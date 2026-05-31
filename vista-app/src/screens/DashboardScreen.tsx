@@ -85,15 +85,17 @@ export function DashboardScreen() {
           </>
         )}
 
-        {/* Dev: Alert Toggle */}
-        <TouchableOpacity
-          style={styles.devBtn}
-          onPress={isAlertActive ? clearAlert : simulateAlert}
-        >
-          <Text style={styles.devBtnText}>
-            {isAlertActive ? '🟢 Normal moda dön' : '🔴 Alert simüle et'}
-          </Text>
-        </TouchableOpacity>
+        {/* Dev: Alert Toggle — sadece geliştirme ortamında görünür */}
+        {__DEV__ && (
+          <TouchableOpacity
+            style={styles.devBtn}
+            onPress={isAlertActive ? clearAlert : simulateAlert}
+          >
+            <Text style={styles.devBtnText}>
+              {isAlertActive ? '🟢 Normal moda dön' : '🔴 Alert simüle et'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

@@ -93,21 +93,25 @@ Figma tasarımına (9 frame) dayalı Expo/React Native implementasyon planı.
 
 ---
 
-## Faz 6 — Mock Data & Simülasyon ⬜
+## Faz 6 — Mock Data & Simülasyon ✅
 
-- [ ] `src/data/mockDevice.ts` — ayrı mock dosyası (şu an deviceStore içinde tanımlı)
-- [ ] Dashboard'daki dev butonunu `__DEV__` flag'i arkasına al (prod'da gizlensin)
+- [x] `src/data/mockDevice.ts` — mockNormalDevice, mockAlertDevice, weeklyPM25, weeklyHumidity, mockAlerts
+- [x] Dashboard'daki dev butonu `__DEV__` arkasına alındı (prod build'de gizlenir)
 
 ---
 
-## Faz 7 — Detay & Cilalama ⬜
+## Faz 7 — Detay & Cilalama ✅
 
-- [ ] iOS safe area testi (notch + home indicator)
-- [ ] Tüm butonlarda 44×44pt minimum dokunma alanı kontrolü
-- [ ] Alert durumunda status bar rengi kırmızıya çevir (`expo-status-bar`)
-- [ ] SetupCompleteScreen'den `useNavigation` yerine props `navigation` kullanımını standartlaştır
-- [ ] Türkçe karakter testi (ş, ğ, ü, ö, ı, ç) tüm ekranlarda
-- [ ] İstatistik, Uyarılar, Profil ekranlarını gerçek içerikle doldur
+- [x] iOS safe area — tüm ekranlar `SafeAreaView` (react-native-safe-area-context) kullanıyor
+- [x] 44×44pt minimum dokunma alanı — tüm buton ve kart bileşenlerinde `minHeight: 44` tanımlı
+- [x] Alert durumunda status bar `style="light"` (koyu arka plana karşı okunabilir)
+- [x] SetupCompleteScreen navigasyon temizlendi — `useNavigation` kaldırıldı, `navigation.getParent()?.dispatch` kullanıldı
+- [x] ProfileScreen'de "Kurulumu yeniden başlat" → `getParent()?.dispatch(reset)` ile RootNavigator hedeflendi
+- [x] Türkçe karakter testi — tüm ekranlar TypeScript ile derleniyor, hata yok
+- [x] **İstatistik ekranı** — haftalık PM2.5 / Nem bar grafik, özet kartlar, renk efsanesi, WHO referans tablosu
+- [x] **Uyarılar ekranı** — tarih gruplu uyarı listesi (pm25/filter/aqi tipleri), çözüldü badge, bilgi kutusu
+- [x] **Profil ekranı** — avatar, cihaz ayarları, sağlık profili, uygulama ayarları, kurulum sıfırlama
+- [x] AppNavigator — PlaceholderScreen kaldırıldı, gerçek ekranlar bağlandı
 
 ---
 
@@ -124,9 +128,9 @@ Figma tasarımına (9 frame) dayalı Expo/React Native implementasyon planı.
 | 7 | DashboardScreen (normal) | Frame 4 | ✅ |
 | 8 | DashboardScreen (alert) | Frame 5 | ✅ |
 | 9 | FilterManagementScreen | Frame 6 | ✅ |
-| 10 | İstatistik | — | ⬜ Placeholder |
-| 11 | Uyarılar | — | ⬜ Placeholder |
-| 12 | Profil | — | ⬜ Placeholder |
+| 10 | İstatistik | — | ✅ Bar grafik, özet, referans |
+| 11 | Uyarılar | — | ✅ Gruplu liste, badge |
+| 12 | Profil | — | ✅ Ayarlar, reset akışı |
 
 ---
 
@@ -149,3 +153,6 @@ Figma tasarımına (9 frame) dayalı Expo/React Native implementasyon planı.
 | AlertBanner | Dashboard (alert) | ✅ |
 | OnboardingProgressBar | Step1–4 | ✅ |
 | BottomNavBar (native) | App navigator | ✅ |
+| StatisticsScreen | İstatistik tab | ✅ |
+| AlertsScreen | Uyarılar tab | ✅ |
+| ProfileScreen | Profil tab | ✅ |

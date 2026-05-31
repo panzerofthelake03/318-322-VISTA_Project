@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation, CommonActions } from '@react-navigation/native';
 import { PrimaryButton } from '../components';
 import { colors, fontSize, fontWeight, radius, spacing } from '../theme';
 import { useOnboardingStore } from '../store/onboardingStore';
@@ -13,9 +12,8 @@ import { OnboardingStackParamList } from '../navigation/OnboardingNavigator';
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'SetupComplete'>;
 
 export function SetupCompleteScreen({ navigation }: Props) {
-  const { profileName, filterType, pmThreshold, roomType } = useOnboardingStore();
+  const { profileName, filterType, pmThreshold, roomType, completeOnboarding } = useOnboardingStore();
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const nav = useNavigation();
 
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
@@ -23,11 +21,12 @@ export function SetupCompleteScreen({ navigation }: Props) {
 
   const handleGoToApp = async () => {
     await AsyncStorage.setItem('onboardingCompleted', 'true');
-    // getParent() ile RootNavigator'a ulaşıp 'App' route'una reset yapıyoruz
-    nav.getParent()?.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'App' }] }));
+    // Store'u güncelle → RootNavigator reaktif olarak App'e geçer
+    completeOnboarding();
   };
 
-  const roomLabel = roomType === 'baby_room' ? 'Çocuk odası'
+  const roomLabel =
+    roomType === 'baby_room' ? 'Çocuk odası'
     : roomType === 'living' ? 'Oturma odası'
     : roomType === 'kitchen' ? 'Mutfak'
     : roomType === 'office' ? 'Ofis'
@@ -102,20 +101,8 @@ const styles = StyleSheet.create({
 });
 
 const summaryStyles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  label: {
-    fontSize: fontSize.md,
-    color: colors.textSecondary,
-  },
-  value: {
-    fontSize: fontSize.md,
-    color: colors.textPrimary,
-    fontWeight: fontWeight.medium,
-  },
-  highlight: {
-    color: colors.coral,
-  },
+  row: { flexDirection: 'row', justifyContent: 'space-between' },
+  label: { fontSize: fontSize.md, color: colors.textSecondary },
+  value: { fontSize: fontSize.md, color: colors.textPrimary, fontWeight: fontWeight.medium },
+  highlight: { color: colors.coral },
 });

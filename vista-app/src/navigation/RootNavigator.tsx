@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, ActivityIndicator } from 'react-native';
 import { OnboardingNavigator } from './OnboardingNavigator';
 import { AppNavigator } from './AppNavigator';
-import { View, ActivityIndicator } from 'react-native';
 import { colors } from '../theme';
+import { useOnboardingStore } from '../store/onboardingStore';
 
 type RootParamList = {
   Onboarding: undefined;
@@ -16,11 +17,12 @@ const Stack = createNativeStackNavigator<RootParamList>();
 
 export function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
-  const [onboardingDone, setOnboardingDone] = useState(false);
+  const { isOnboardingComplete, completeOnboarding } = useOnboardingStore();
 
+  // İlk açılışta AsyncStorage'dan flag'i oku, store'a yaz
   useEffect(() => {
     AsyncStorage.getItem('onboardingCompleted').then((val) => {
-      setOnboardingDone(val === 'true');
+      if (val === 'true') completeOnboarding();
       setIsReady(true);
     });
   }, []);
@@ -35,8 +37,8 @@ export function RootNavigator() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {onboardingDone ? (
+      <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade' }}>
+        {isOnboardingComplete ? (
           <Stack.Screen name="App" component={AppNavigator} />
         ) : (
           <Stack.Screen name="Onboarding" component={OnboardingNavigator} />

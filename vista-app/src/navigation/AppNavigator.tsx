@@ -2,8 +2,10 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { DashboardScreen } from '../screens/DashboardScreen';
+import { StatisticsScreen } from '../screens/StatisticsScreen';
 import { FilterManagementScreen } from '../screens/FilterManagementScreen';
-import { PlaceholderScreen } from '../screens/PlaceholderScreen';
+import { AlertsScreen } from '../screens/AlertsScreen';
+import { ProfileScreen } from '../screens/ProfileScreen';
 import { colors, fontSize } from '../theme';
 import { useDeviceStore } from '../store/deviceStore';
 
@@ -41,23 +43,18 @@ export function AppNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={DashboardScreen} options={{ title: 'Ana ekran' }} />
-      <Tab.Screen name="Statistics" options={{ title: 'İstatistik' }}>
-        {() => <PlaceholderScreen title="İstatistik" />}
-      </Tab.Screen>
+      <Tab.Screen name="Statistics" component={StatisticsScreen} options={{ title: 'İstatistik' }} />
       <Tab.Screen name="Control" component={FilterManagementScreen} options={{ title: 'Kontrol' }} />
       <Tab.Screen
         name="Alerts"
+        component={AlertsScreen}
         options={{
           title: 'Uyarılar',
           tabBarBadge: isAlertActive ? '' : undefined,
-          tabBarBadgeStyle: { backgroundColor: colors.red, minWidth: 10, minHeight: 10 },
+          tabBarBadgeStyle: { backgroundColor: colors.red, minWidth: 10, minHeight: 10, transform: [{ scale: 0.7 }] },
         }}
-      >
-        {() => <PlaceholderScreen title="Uyarılar" />}
-      </Tab.Screen>
-      <Tab.Screen name="Profile" options={{ title: 'Profil' }}>
-        {() => <PlaceholderScreen title="Profil" />}
-      </Tab.Screen>
+      />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profil' }} />
     </Tab.Navigator>
   );
 }
