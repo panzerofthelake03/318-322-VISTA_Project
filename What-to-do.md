@@ -222,3 +222,26 @@ If you need to sequence the work in real time:
 | Process report (revised) | ❌ Needs update |
 | Group report | ❌ Missing |
 | Figma prototype links | ⚠️ Need to confirm sharing settings |
+| **Expo çalışan uygulama (smartphone)** | ✅ Faz 0–5 tamamlandı — 9 ekran, 15 bileşen, navigasyon çalışıyor |
+
+---
+
+## Expo Uygulama İlerleme Durumu (2026-05-30)
+
+Figma tasarımındaki 9 telefon ekranının tümü Expo/React Native ile kodlandı ve Android emülatöründe çalıştırıldı.
+
+### Tamamlanan
+- Proje kurulumu (Expo SDK 56, TypeScript)
+- Design token sistemi (renkler, tipografi, spacing)
+- 15 yeniden kullanılabilir bileşen
+- 9 ekran (onboarding akışı + dashboard normal/alert + filtre yönetimi)
+- React Navigation (Stack + Bottom Tabs + Root navigator)
+- Zustand state management (onboarding + cihaz durumu)
+- Alert simülasyonu (dashboard'da toggle)
+- AsyncStorage ile onboarding tamamlanma flag'i
+
+### Kalan (Faz 6–7)
+- İstatistik, Uyarılar, Profil ekranları (şu an placeholder)
+- Dev simülasyon butonunu `__DEV__` arkasına alma
+- iOS safe area testi
+- Saat (smartwatch) arayüzü ayrıca kodlanacak
