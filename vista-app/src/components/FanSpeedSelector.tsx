@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { colors, fontSize, fontWeight, radius, spacing } from '../theme';
 
 type Speed = 1 | 2 | 3 | 'Max';
@@ -25,7 +26,10 @@ export function FanSpeedSelector({ value, onChange, speedLabel }: Props) {
             <TouchableOpacity
               key={String(opt)}
               style={[styles.btn, active && styles.btnActive]}
-              onPress={() => onChange(opt)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onChange(opt);
+              }}
               activeOpacity={0.8}
             >
               <Text style={[styles.btnLabel, active && styles.btnLabelActive]}>

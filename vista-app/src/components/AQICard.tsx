@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors, fontSize, fontWeight, radius, spacing } from '../theme';
 
 type AQIStatus = 'Temiz' | 'Orta' | 'Sağlıksız';
@@ -10,16 +11,31 @@ interface Props {
   status: AQIStatus;
   mode?: string;
   isAlert?: boolean;
+  isAutoModeActive?: boolean;
+  onModePress?: () => void;
 }
 
-const statusConfig: Record<AQIStatus, { bg: string; text: string; border: string; icon: keyof typeof Ionicons.glyphMap }> = {
-  Temiz: { bg: colors.greenLight, text: colors.green, border: colors.green, icon: 'checkmark-circle-outline' },
-  Orta: { bg: colors.amberLight, text: colors.amber, border: colors.amber, icon: 'alert-circle-outline' },
-  Sağlıksız: { bg: colors.redLight, text: colors.red, border: colors.red, icon: 'warning-outline' },
+const statusConfig: Record<AQIStatus, { bg: string; text: string; border: string }> = {
+  Temiz:    { bg: colors.greenLight, text: colors.green, border: colors.green },
+  Orta:     { bg: colors.amberLight, text: colors.amber, border: colors.amber },
+  Sağlıksız:{ bg: colors.redLight,   text: colors.red,   border: colors.red   },
 };
 
-export function AQICard({ aqi, status, mode = 'Otomatik mod', isAlert = false }: Props) {
+export function AQICard({
+  aqi,
+  status,
+  mode = 'Otomatik mod',
+  isAlert = false,
+  isAutoModeActive = true,
+  onModePress,
+}: Props) {
   const config = statusConfig[status];
+
+  // Alert durumu: her zaman dolu (aktif görünüm)
+  // Normal durum: isAutoModeActive'e göre dolu (beyaz yazı) veya boş (yeşil yazı)
+  const circleFilled = isAlert || isAutoModeActive;
+  const circleBg    = circleFilled ? config.border : colors.white;
+  const circleText  = circleFilled ? colors.white  : config.border;
 
   return (
     <View style={[styles.card, { backgroundColor: config.bg, borderColor: config.border }]}>
@@ -28,13 +44,22 @@ export function AQICard({ aqi, status, mode = 'Otomatik mod', isAlert = false }:
         <Text style={[styles.aqiNumber, { color: config.text }]}>{aqi}</Text>
         <Text style={[styles.statusText, { color: config.text }]}>AQI · {status}</Text>
       </View>
-      <View style={[styles.circle, { borderColor: config.border }]}>
+
+      <TouchableOpacity
+        style={[styles.circle, { borderColor: config.border, backgroundColor: circleBg }]}
+        onPress={!isAlert ? () => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          onModePress?.();
+        } : undefined}
+        activeOpacity={isAlert ? 1 : 0.75}
+        disabled={isAlert}
+      >
         {isAlert ? (
-          <Ionicons name="warning-outline" size={28} color={config.text} />
+          <Ionicons name="warning-outline" size={28} color={circleText} />
         ) : (
-          <Text style={[styles.modeLabel, { color: config.text }]}>{mode}</Text>
+          <Text style={[styles.modeLabel, { color: circleText }]}>{mode}</Text>
         )}
-      </View>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -48,9 +73,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  left: {
-    gap: 2,
-  },
+  left: { gap: 2 },
   smallLabel: {
     fontSize: fontSize.sm,
     color: colors.textSecondary,

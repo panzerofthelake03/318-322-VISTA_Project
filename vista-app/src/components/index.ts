@@ -12,3 +12,6 @@ export { RoomListItem } from './RoomListItem';
 export { ActionCard } from './ActionCard';
 export { AlertBanner } from './AlertBanner';
 export { OnboardingProgressBar } from './OnboardingProgressBar';
+export { RipplePressable } from './RipplePressable';
+export { SelectionModal } from './SelectionModal';
+export type { ModalOption } from './SelectionModal';

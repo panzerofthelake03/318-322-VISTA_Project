@@ -1,3 +1,68 @@
+// Oda → cihaz eşleşme tablosu (filtre tipi odaya bağlı, değiştirilemez)
+export type RoomKey = 'baby_room' | 'living' | 'kitchen' | 'office';
+
+export interface RoomDevice {
+  name: string;
+  filterType: string;
+  aqi: number;
+  pm25: number;
+  co2: number;
+  humidity: number;
+  status: 'İyi' | 'Orta' | 'Sağlıksız';
+  statusColor: string;
+  isAlert?: boolean;
+}
+
+export const ROOM_DEVICE_MAP: Record<RoomKey, RoomDevice> = {
+  baby_room: {
+    name: "Ada'nın odası",
+    filterType: 'HEPA H13',
+    aqi: 32,
+    pm25: 8,
+    co2: 612,
+    humidity: 58,
+    status: 'İyi',
+    statusColor: '#4CAF7D',
+  },
+  living: {
+    name: 'Oturma odası',
+    filterType: 'HEPA H11',
+    aqi: 148,
+    pm25: 72,
+    co2: 980,
+    humidity: 55,
+    status: 'Sağlıksız',
+    statusColor: '#D0021B',
+    isAlert: true,
+  },
+  kitchen: {
+    name: 'Mutfak',
+    filterType: 'Aktif Karbon',
+    aqi: 131,
+    pm25: 58,
+    co2: 1140,
+    humidity: 62,
+    status: 'Sağlıksız',
+    statusColor: '#D0021B',
+    isAlert: true,
+  },
+  office: {
+    name: 'Ofis',
+    filterType: 'Kombine H13+Karbon',
+    aqi: 55,
+    pm25: 14,
+    co2: 1100,
+    humidity: 48,
+    status: 'Orta',
+    statusColor: '#F5A623',
+  },
+};
+
+export const ALL_ROOMS = Object.entries(ROOM_DEVICE_MAP).map(([key, val]) => ({
+  key: key as RoomKey,
+  ...val,
+}));
+
 export const mockNormalDevice = {
   aqi: 32,
   pm25: 8,

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { ROOM_DEVICE_MAP, RoomKey } from '../data/mockDevice';
 
 interface OnboardingState {
   isOnboardingComplete: boolean;
@@ -16,6 +17,8 @@ interface OnboardingState {
   setHealthConditions: (conditions: string[]) => void;
   setRoomType: (room: string) => void;
   setRoutines: (routines: Record<string, boolean>) => void;
+  setFilterType: (filterType: string) => void;
+  setPmThreshold: (pmThreshold: number) => void;
 }
 
 export const useOnboardingStore = create<OnboardingState>((set) => ({
@@ -45,6 +48,11 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
 
   setUserProfiles: (profiles) => set({ userProfiles: profiles }),
   setHealthConditions: (conditions) => set({ healthConditions: conditions }),
-  setRoomType: (room) => set({ roomType: room }),
+  setRoomType: (room) => {
+    const device = ROOM_DEVICE_MAP[room as RoomKey];
+    set({ roomType: room, filterType: device?.filterType ?? 'HEPA H13' });
+  },
   setRoutines: (routines) => set({ routines }),
+  setFilterType: (filterType) => set({ filterType }),
+  setPmThreshold: (pmThreshold) => set({ pmThreshold }),
 }));
