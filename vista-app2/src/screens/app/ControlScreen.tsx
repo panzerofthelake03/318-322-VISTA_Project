@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,15 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
+  Dimensions,
+  Platform,
+  Linking,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as IntentLauncher from 'expo-intent-launcher';
 import { useDeviceStore } from '../../store/deviceStore';
 import { colors, spacing, fontSize, fontWeight, radius } from '../../theme';
 
@@ -25,11 +31,133 @@ const MODE_CONFIG: Array<{
   { key: 'manual', icon: 'square-outline', label: 'Manuel' },
 ];
 
-const PRESET_COLORS: Record<LightPreset, string> = {
-  Sunrise: colors.amber,
-  Sunset: colors.coral,
-  Moonlight: '#2C3E50',
+// Gradient fills for the light preset buttons (per Figma)
+const PRESET_GRADIENTS: Record<LightPreset, [string, string]> = {
+  Sunrise: ['#FBE7A2', '#F2C94C'],
+  Sunset: ['#F2784B', '#4A6FA5'],
+  Moonlight: ['#4A5699', '#2C3565'],
 };
+
+const PRESET_TEXT_COLORS: Record<LightPreset, string> = {
+  Sunrise: '#8A6D1A',
+  Sunset: colors.white,
+  Moonlight: colors.white,
+};
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CARD_INNER_WIDTH = SCREEN_WIDTH - spacing.lg * 2 - spacing.md * 2;
+const COLOR_WELL_SIZE = Math.min(CARD_INNER_WIDTH - spacing.lg * 2, 240);
+
+async function openWeatherApp() {
+  try {
+    if (Platform.OS === 'ios') {
+      // Apple Weather
+      await Linking.openURL('weather://');
+    } else {
+      // Google app's weather screen — must be launched as an explicit intent
+      await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+        data: 'dynact://velour/weather/ProxyActivity',
+        packageName: 'com.google.android.googlequicksearchbox',
+        className: 'com.google.android.apps.gsa.velour.DynamicActivityTrampoline',
+      });
+    }
+  } catch {
+    // No native weather app available — fall back to web forecast
+    Linking.openURL('https://www.google.com/search?q=hava+durumu').catch(
+      () => {}
+    );
+  }
+}
+
+// Selectable color dots around the wheel's edge (per Figma)
+const DOT_COLORS = [
+  '#E07A2F',
+  '#F2C94C',
+  '#FDF6E3',
+  '#9BC4F8',
+  '#4A6FD0',
+  '#1F2A6B',
+];
+const DOT_SIZE = 26;
+const DOT_RADIUS = COLOR_WELL_SIZE / 2 + DOT_SIZE / 2 + 6;
+const FAN_HEIGHT = DOT_RADIUS + DOT_SIZE;
+
+// Top half of the color well image, shown as a semicircle,
+// with selectable color dots placed along its edge
+function ColorFan() {
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const cx = CARD_INNER_WIDTH / 2;
+
+  return (
+    <View style={fanStyles.container}>
+      <Image
+        source={require('../../../assets/Color Well.png')}
+        style={[
+          fanStyles.image,
+          { left: cx - COLOR_WELL_SIZE / 2, top: FAN_HEIGHT - COLOR_WELL_SIZE / 2 },
+        ]}
+        resizeMode="contain"
+      />
+      {DOT_COLORS.map((color, i) => {
+        const angleDeg = 165 - (i * 150) / (DOT_COLORS.length - 1);
+        const angleRad = (angleDeg * Math.PI) / 180;
+        const x = cx + DOT_RADIUS * Math.cos(angleRad) - DOT_SIZE / 2;
+        const y = FAN_HEIGHT - DOT_RADIUS * Math.sin(angleRad) - DOT_SIZE / 2;
+        const isSelected = selectedColor === color;
+        return (
+          <TouchableOpacity
+            key={color}
+            style={[
+              fanStyles.dot,
+              {
+                backgroundColor: color,
+                left: x,
+                top: y,
+                transform: [
+                  { rotate: `${90 - angleDeg}deg` },
+                  ...(isSelected ? [{ scale: 1.15 }] : []),
+                ],
+              },
+              isSelected && fanStyles.dotSelected,
+            ]}
+            onPress={() => setSelectedColor(color)}
+            activeOpacity={0.8}
+          />
+        );
+      })}
+    </View>
+  );
+}
+
+const fanStyles = StyleSheet.create({
+  container: {
+    height: FAN_HEIGHT,
+    overflow: 'hidden',
+    marginBottom: spacing.md,
+  },
+  image: {
+    position: 'absolute',
+    width: COLOR_WELL_SIZE,
+    height: COLOR_WELL_SIZE,
+  },
+  dot: {
+    position: 'absolute',
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: colors.white,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  dotSelected: {
+    borderWidth: 3,
+    borderColor: colors.coral,
+  },
+});
 
 interface ToggleRowProps {
   icon: React.ComponentProps<typeof Ionicons>['name'];
@@ -143,8 +271,8 @@ export function ControlScreen() {
               >
                 <Ionicons
                   name={cfg.icon}
-                  size={20}
-                  color={isActive ? colors.coral : colors.textSecondary}
+                  size={22}
+                  color={isActive ? colors.white : colors.textSecondary}
                 />
                 <Text style={[styles.modeButtonText, isActive && styles.modeButtonTextActive]}>
                   {cfg.label}
@@ -184,22 +312,27 @@ export function ControlScreen() {
           {/* Water Level */}
           <View style={[styles.sectionCard, styles.halfCard]}>
             <Text style={styles.sectionLabel}>Su Seviyesi</Text>
-            <View style={styles.waterContainer}>
-              <View style={styles.waterTrack}>
-                <View style={[styles.waterFill, { height: `${waterLevel}%` as any }]} />
-              </View>
+            <View style={styles.waterTank}>
               <Text style={styles.waterPercent}>{waterLevel}%</Text>
+              <LinearGradient
+                colors={['#CFE6F8', '#7FB3E8']}
+                style={[styles.waterFill, { height: `${waterLevel}%` as any }]}
+              />
             </View>
           </View>
 
           {/* Humidity */}
           <View style={[styles.sectionCard, styles.halfCard]}>
             <Text style={styles.sectionLabel}>Nem Seviyesi</Text>
-            <Ionicons name="water-outline" size={28} color={colors.coral} />
-            <Text style={styles.humidityValue}>{humidity}%</Text>
-            <TouchableOpacity>
-              <Text style={styles.controlLink}>Kontrol et →</Text>
-            </TouchableOpacity>
+            <View style={styles.humidityBody}>
+              <View style={styles.humidityRow}>
+                <Ionicons name="water" size={30} color="#5B9BE0" />
+                <Text style={styles.humidityValue}>{humidity}%</Text>
+              </View>
+              <TouchableOpacity onPress={openWeatherApp}>
+                <Text style={styles.controlLink}>Kontrol et →</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -239,12 +372,8 @@ export function ControlScreen() {
 
           {lightOn && (
             <>
-              {/* Color swatch */}
-              <View style={styles.colorSwatch}>
-                <View style={[styles.colorBlock, { backgroundColor: '#FF6B35' }]} />
-                <View style={[styles.colorBlock, { backgroundColor: '#FFD700' }]} />
-                <View style={[styles.colorBlock, { backgroundColor: '#4A90E2' }]} />
-              </View>
+              {/* Semicircular color fan */}
+              <ColorFan />
 
               {/* Presets */}
               <View style={styles.presetRow}>
@@ -253,25 +382,23 @@ export function ControlScreen() {
                   return (
                     <TouchableOpacity
                       key={preset}
-                      style={[
-                        styles.presetPill,
-                        {
-                          backgroundColor: isActive
-                            ? PRESET_COLORS[preset]
-                            : colors.surface,
-                        },
-                      ]}
+                      style={[styles.presetButton, isActive && styles.presetButtonActive]}
                       onPress={() => setLightPreset(preset)}
                       activeOpacity={0.8}
                     >
-                      <Text
-                        style={[
-                          styles.presetText,
-                          isActive && styles.presetTextActive,
-                        ]}
+                      <LinearGradient
+                        colors={PRESET_GRADIENTS[preset]}
+                        style={styles.presetGradient}
                       >
-                        {preset}
-                      </Text>
+                        <Text
+                          style={[
+                            styles.presetText,
+                            { color: PRESET_TEXT_COLORS[preset] },
+                          ]}
+                        >
+                          {preset}
+                        </Text>
+                      </LinearGradient>
                     </TouchableOpacity>
                   );
                 })}
@@ -358,15 +485,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.xs,
     paddingVertical: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: radius.xl,
     backgroundColor: colors.surface,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: colors.border,
-    minHeight: 70,
+    minHeight: 80,
     justifyContent: 'center',
   },
   modeButtonActive: {
-    backgroundColor: colors.coralLight,
+    backgroundColor: colors.coral,
     borderColor: colors.coral,
   },
   modeButtonText: {
@@ -375,7 +502,7 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.medium,
   },
   modeButtonTextActive: {
-    color: colors.coral,
+    color: colors.white,
     fontWeight: fontWeight.semiBold,
   },
   sectionCard: {
@@ -438,36 +565,41 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: spacing.md,
   },
-  waterContainer: {
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  waterTrack: {
-    width: 40,
-    height: 80,
-    backgroundColor: colors.bg,
-    borderRadius: radius.sm,
-    borderWidth: 1.5,
+  waterTank: {
+    height: 110,
+    backgroundColor: colors.white,
+    borderRadius: radius.lg,
+    borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
     justifyContent: 'flex-end',
   },
   waterFill: {
-    backgroundColor: '#4A90E2',
     width: '100%',
-    borderRadius: 4,
   },
   waterPercent: {
-    fontSize: fontSize.sm,
+    position: 'absolute',
+    top: spacing.sm,
+    alignSelf: 'center',
+    fontSize: fontSize.lg,
     fontWeight: fontWeight.semiBold,
     color: colors.textPrimary,
+    zIndex: 1,
+  },
+  humidityBody: {
+    flex: 1,
+    justifyContent: 'space-evenly',
+    alignItems: 'flex-start',
+  },
+  humidityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   humidityValue: {
-    fontSize: fontSize.xxl,
+    fontSize: fontSize.xxxl,
     fontWeight: fontWeight.bold,
     color: colors.textPrimary,
-    marginTop: spacing.xs,
-    marginBottom: spacing.xs,
   },
   controlLink: {
     fontSize: fontSize.sm,
@@ -480,37 +612,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.md,
   },
-  colorSwatch: {
-    flexDirection: 'row',
-    height: 32,
-    borderRadius: radius.md,
-    overflow: 'hidden',
-    marginBottom: spacing.md,
-  },
-  colorBlock: {
-    flex: 1,
-  },
   presetRow: {
     flexDirection: 'row',
     gap: spacing.sm,
   },
-  presetPill: {
+  presetButton: {
     flex: 1,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.full,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  presetButtonActive: {
+    borderColor: colors.coral,
+  },
+  presetGradient: {
+    minHeight: 48,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    minHeight: 36,
     justifyContent: 'center',
+    paddingVertical: spacing.sm,
   },
   presetText: {
     fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    fontWeight: fontWeight.medium,
-  },
-  presetTextActive: {
-    color: colors.white,
     fontWeight: fontWeight.semiBold,
   },
 });
