@@ -77,6 +77,13 @@ export const weeklyAQI = [
   { day: 'Pzr', value: 41 },
 ];
 
+export const monthlyAQI = [
+  { day: '1. Hf', value: 44 },
+  { day: '2. Hf', value: 61 },
+  { day: '3. Hf', value: 38 },
+  { day: '4. Hf', value: 49 },
+];
+
 export const hourlyPM25 = [
   { hour: '00:00', value: 6 },
   { hour: '03:00', value: 5 },

@@ -8,53 +8,58 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TouchableOpacity } from 'react-native';
-import { weeklyAQI, hourlyPM25 } from '../../data/mockDevice';
+import Svg, { Polyline, Polygon, Line as SvgLine, Circle } from 'react-native-svg';
+import { weeklyAQI, monthlyAQI, hourlyPM25 } from '../../data/mockDevice';
 import { colors, spacing, fontSize, fontWeight, radius } from '../../theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CHART_PADDING = spacing.lg * 2;
-const CHART_WIDTH = SCREEN_WIDTH - CHART_PADDING;
-const BAR_CHART_HEIGHT = 160;
-const LINE_CHART_HEIGHT = 120;
+const CHART_WIDTH = SCREEN_WIDTH - spacing.lg * 2;
+const BAR_CHART_HEIGHT = 170;
+const LINE_CHART_HEIGHT = 150;
 
-function getBarColor(value: number): string {
-  if (value > 100) return colors.red;
-  if (value > 50) return colors.amber;
-  return colors.green;
+type AQIDatum = { day: string; value: number };
+
+function getBarColor(value: number): { fill: string; cap: string } {
+  if (value > 100) return { fill: colors.redLight, cap: colors.red };
+  if (value > 50) return { fill: colors.amberLight, cap: colors.amber };
+  return { fill: colors.greenLight, cap: colors.green };
 }
 
-function BarChart() {
-  const maxValue = Math.max(...weeklyAQI.map((d) => d.value));
-  const selectedDay = 'Çrş'; // Wednesday is selected by default
+function BarChart({ data }: { data: AQIDatum[] }) {
+  const maxValue = Math.max(...data.map((d) => d.value));
 
   return (
     <View style={barStyles.container}>
       <View style={barStyles.barsRow}>
-        {weeklyAQI.map((item) => {
-          const isSelected = item.day === selectedDay;
-          const barHeight = (item.value / maxValue) * (BAR_CHART_HEIGHT - 32);
-          const barColor = getBarColor(item.value);
+        {data.map((item) => {
+          const isPeak = item.value === maxValue;
+          const barHeight = Math.max(
+            8,
+            (item.value / maxValue) * BAR_CHART_HEIGHT
+          );
+          const { fill, cap } = getBarColor(item.value);
 
           return (
             <View key={item.day} style={barStyles.barColumn}>
-              {isSelected && (
-                <Text style={barStyles.valueLabel}>{item.value}</Text>
-              )}
               <View style={barStyles.barTrack}>
+                <Text style={[barStyles.valueLabel, isPeak && { color: cap }]}>
+                  {item.value}
+                </Text>
                 <View
                   style={[
                     barStyles.bar,
-                    {
-                      height: barHeight,
-                      backgroundColor: isSelected
-                        ? darkenColor(barColor)
-                        : barColor,
-                      opacity: isSelected ? 1 : 0.75,
-                    },
+                    { height: barHeight, backgroundColor: fill },
                   ]}
-                />
+                >
+                  <View style={[barStyles.barCap, { backgroundColor: cap }]} />
+                </View>
               </View>
-              <Text style={[barStyles.dayLabel, isSelected && barStyles.dayLabelSelected]}>
+              <Text
+                style={[
+                  barStyles.dayLabel,
+                  isPeak && { color: cap, fontWeight: fontWeight.semiBold },
+                ]}
+              >
                 {item.day}
               </Text>
             </View>
@@ -65,108 +70,74 @@ function BarChart() {
   );
 }
 
-function darkenColor(hex: string): string {
-  // Simple darkening: just return the color with full opacity
-  return hex;
-}
-
 function LineChart() {
-  const maxValue = Math.max(...hourlyPM25.map((d) => d.value));
   const threshold = 15;
-  const thresholdY = LINE_CHART_HEIGHT - (threshold / maxValue) * LINE_CHART_HEIGHT;
-  const maxY = LINE_CHART_HEIGHT - (maxValue / maxValue) * LINE_CHART_HEIGHT;
+  const maxValue = Math.max(...hourlyPM25.map((d) => d.value));
+  const yMax = maxValue * 1.15; // headroom above the peak
+  const w = CHART_WIDTH;
+  const h = LINE_CHART_HEIGHT;
 
-  // Calculate point positions
-  const points = hourlyPM25.map((item, index) => {
-    const x = (index / (hourlyPM25.length - 1)) * CHART_WIDTH;
-    const y = LINE_CHART_HEIGHT - (item.value / (maxValue + 5)) * LINE_CHART_HEIGHT;
-    return { x, y, value: item.value };
-  });
+  const toY = (value: number) => h - (value / yMax) * h;
 
-  // Create line segments between consecutive points
-  const segments: Array<{
-    x: number;
-    y: number;
-    length: number;
-    angle: number;
-  }> = [];
+  const points = hourlyPM25.map((item, index) => ({
+    x: (index / (hourlyPM25.length - 1)) * w,
+    y: toY(item.value),
+  }));
 
-  for (let i = 0; i < points.length - 1; i++) {
-    const p1 = points[i];
-    const p2 = points[i + 1];
-    const dx = p2.x - p1.x;
-    const dy = p2.y - p1.y;
-    const length = Math.sqrt(dx * dx + dy * dy);
-    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-    segments.push({
-      x: p1.x,
-      y: p1.y,
-      length,
-      angle,
-    });
-  }
+  const linePoints = points.map((p) => `${p.x},${p.y}`).join(' ');
+  const areaPoints = `0,${h} ${linePoints} ${w},${h}`;
 
-  // X-axis labels (every other hour)
+  const thresholdY = toY(threshold);
+  const peak = points.reduce((a, b) => (a.y < b.y ? a : b));
+
   const xLabels = ['00:00', '06:00', '12:00', '18:00'];
 
   return (
     <View style={lineStyles.container}>
-      {/* Max label */}
-      <View style={[lineStyles.maxLabel, { top: maxY - 16 }]}>
-        <Text style={lineStyles.maxLabelText}>maks {maxValue}μg</Text>
-      </View>
+      {/* Max label, anchored above the peak */}
+      <Text
+        style={[
+          lineStyles.maxLabelText,
+          { position: 'absolute', top: Math.max(0, peak.y - 18), right: 0 },
+        ]}
+      >
+        maks {maxValue}μg
+      </Text>
 
-      {/* Threshold line */}
-      <View style={[lineStyles.thresholdLine, { top: thresholdY }]}>
-        <Text style={lineStyles.thresholdLabel}>eşik</Text>
-      </View>
+      {/* Threshold label */}
+      <Text
+        style={[lineStyles.thresholdLabel, { top: thresholdY - 16 }]}
+      >
+        eşik
+      </Text>
 
-      {/* Chart area */}
-      <View style={lineStyles.chartArea}>
-        {/* Area fill approximation */}
-        {points.map((pt, i) => {
-          if (i === points.length - 1) return null;
-          const nextPt = points[i + 1];
-          return (
-            <View
-              key={i}
-              style={[
-                lineStyles.areaFill,
-                {
-                  left: pt.x,
-                  top: Math.min(pt.y, nextPt.y),
-                  width: nextPt.x - pt.x,
-                  height: LINE_CHART_HEIGHT - Math.min(pt.y, nextPt.y),
-                },
-              ]}
-            />
-          );
-        })}
-
-        {/* Line segments */}
-        {segments.map((seg, i) => (
-          <View
-            key={i}
-            style={[
-              lineStyles.segment,
-              {
-                left: seg.x,
-                top: seg.y,
-                width: seg.length,
-                transform: [{ rotate: `${seg.angle}deg` }],
-              },
-            ]}
-          />
-        ))}
-
+      <Svg width={w} height={h}>
+        {/* Area fill */}
+        <Polygon points={areaPoints} fill={colors.amberLight} opacity={0.7} />
+        {/* Threshold dashed line */}
+        <SvgLine
+          x1={0}
+          y1={thresholdY}
+          x2={w}
+          y2={thresholdY}
+          stroke={colors.amber}
+          strokeWidth={1.5}
+          strokeDasharray="6,4"
+        />
+        {/* Line */}
+        <Polyline
+          points={linePoints}
+          fill="none"
+          stroke={colors.amber}
+          strokeWidth={2.5}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
         {/* Dots */}
-        {points.map((pt, i) => (
-          <View
-            key={i}
-            style={[lineStyles.dot, { left: pt.x - 4, top: pt.y - 4 }]}
-          />
+        {points.map((p, i) => (
+          <Circle key={i} cx={p.x} cy={p.y} r={3.5} fill={colors.amber} />
         ))}
-      </View>
+      </Svg>
 
       {/* X-axis labels */}
       <View style={lineStyles.xAxis}>
@@ -183,12 +154,17 @@ function LineChart() {
 export function GraphScreen() {
   const [aqiPeriod, setAqiPeriod] = useState<'week' | 'month'>('week');
 
+  const aqiData = aqiPeriod === 'week' ? weeklyAQI : monthlyAQI;
   const avgAQI = Math.round(
-    weeklyAQI.reduce((sum, d) => sum + d.value, 0) / weeklyAQI.length
+    aqiData.reduce((sum, d) => sum + d.value, 0) / aqiData.length
   );
 
   const now = new Date();
-  const monthYear = now.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
+  const monthYear = now.toLocaleDateString('tr-TR', {
+    month: 'long',
+    year: 'numeric',
+  });
+  const periodLabel = aqiPeriod === 'week' ? monthYear : 'Son 30 gün';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -204,7 +180,7 @@ export function GraphScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View>
-              <Text style={styles.sectionTitle}>AQI · {monthYear}</Text>
+              <Text style={styles.sectionTitle}>AQI · {periodLabel}</Text>
               <Text style={styles.sectionSubtitle}>
                 ort. {avgAQI} · Ada için iyi
               </Text>
@@ -230,19 +206,17 @@ export function GraphScreen() {
             </View>
           </View>
 
-          <View style={styles.chartContainer}>
-            <BarChart />
-          </View>
+          <BarChart data={aqiData} />
         </View>
+
+        <View style={styles.divider} />
 
         {/* PM2.5 Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>PM2.5 · 24 saat</Text>
           <Text style={styles.sectionSubtitle}>Ada eşiği: 15μg</Text>
 
-          <View style={styles.chartContainer}>
-            <LineChart />
-          </View>
+          <LineChart />
         </View>
 
         {/* Summary cards */}
@@ -274,8 +248,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxxl,
+    paddingBottom: spacing.lg,
+    justifyContent: 'space-between',
   },
   screenTitle: {
     fontSize: fontSize.xl,
@@ -291,7 +267,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: spacing.md,
+    marginBottom: spacing.lg,
   },
   sectionTitle: {
     fontSize: fontSize.md,
@@ -302,6 +278,7 @@ const styles = StyleSheet.create({
   sectionSubtitle: {
     fontSize: fontSize.sm,
     color: colors.textSecondary,
+    marginBottom: spacing.md,
   },
   periodToggle: {
     flexDirection: 'row',
@@ -319,7 +296,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   periodPillActive: {
-    backgroundColor: colors.coral,
+    backgroundColor: colors.coralLight,
   },
   periodText: {
     fontSize: fontSize.sm,
@@ -327,19 +304,18 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.medium,
   },
   periodTextActive: {
-    color: colors.white,
+    color: colors.coral,
     fontWeight: fontWeight.semiBold,
   },
-  chartContainer: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
+  divider: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginBottom: spacing.xl,
   },
   summaryRow: {
     flexDirection: 'row',
     gap: spacing.sm,
+    marginTop: spacing.sm,
   },
   summaryCard: {
     flex: 1,
@@ -364,101 +340,64 @@ const styles = StyleSheet.create({
 
 const barStyles = StyleSheet.create({
   container: {
-    height: BAR_CHART_HEIGHT,
+    width: CHART_WIDTH,
   },
   barsRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    height: BAR_CHART_HEIGHT - 24,
-    gap: 4,
+    gap: spacing.sm,
   },
   barColumn: {
     flex: 1,
     alignItems: 'center',
-    height: BAR_CHART_HEIGHT - 24,
+  },
+  barTrack: {
+    width: '100%',
+    alignItems: 'center',
     justifyContent: 'flex-end',
   },
   valueLabel: {
     fontSize: fontSize.xs,
-    fontWeight: fontWeight.bold,
-    color: colors.textPrimary,
-    marginBottom: 2,
-  },
-  barTrack: {
-    flex: 1,
-    width: '100%',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 2,
+    fontWeight: fontWeight.semiBold,
+    color: colors.textSecondary,
+    marginBottom: 4,
   },
   bar: {
-    borderRadius: 3,
     width: '100%',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  barCap: {
+    height: 4,
+    width: '100%',
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
   },
   dayLabel: {
     fontSize: fontSize.xs,
     color: colors.textSecondary,
-    marginTop: 4,
-  },
-  dayLabelSelected: {
-    color: colors.coral,
-    fontWeight: fontWeight.semiBold,
+    marginTop: 6,
   },
 });
 
 const lineStyles = StyleSheet.create({
   container: {
-    height: LINE_CHART_HEIGHT + 24,
+    width: CHART_WIDTH,
     position: 'relative',
-  },
-  maxLabel: {
-    position: 'absolute',
-    right: 0,
-    zIndex: 2,
+    paddingTop: spacing.sm,
   },
   maxLabelText: {
     fontSize: fontSize.xs,
     color: colors.amber,
-    fontWeight: fontWeight.medium,
-  },
-  thresholdLine: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 1,
-    borderWidth: 1,
-    borderColor: colors.amber,
-    borderStyle: 'dashed',
-    zIndex: 1,
+    fontWeight: fontWeight.semiBold,
+    zIndex: 2,
   },
   thresholdLabel: {
     position: 'absolute',
     right: 0,
-    top: -14,
     fontSize: fontSize.xs,
     color: colors.amber,
-  },
-  chartArea: {
-    height: LINE_CHART_HEIGHT,
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  areaFill: {
-    position: 'absolute',
-    backgroundColor: colors.coralLight,
-    opacity: 0.4,
-  },
-  segment: {
-    position: 'absolute',
-    height: 2,
-    backgroundColor: colors.amber,
-    transformOrigin: '0 50%',
-  },
-  dot: {
-    position: 'absolute',
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.amber,
+    zIndex: 2,
   },
   xAxis: {
     flexDirection: 'row',
