@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useDeviceStore } from '../../store/deviceStore';
 import { useOnboardingStore } from '../../store/onboardingStore';
 import { ROOM_DEVICE_MAP, RoomKey } from '../../data/mockDevice';
+import { useTemperature, useTranslation, TranslationKey } from '../../i18n';
 import { colors, spacing, fontSize, fontWeight, radius } from '../../theme';
 
 type DeviceMode = 'auto' | 'sleep' | 'manual';
@@ -21,10 +22,10 @@ const MODE_ICONS: Record<DeviceMode, React.ComponentProps<typeof Ionicons>['name
   manual: 'square-outline',
 };
 
-const MODE_LABELS: Record<DeviceMode, string> = {
-  auto: 'Otomatik',
-  sleep: 'Uyku',
-  manual: 'Manuel',
+const MODE_LABEL_KEYS: Record<DeviceMode, TranslationKey> = {
+  auto: 'mode_auto',
+  sleep: 'mode_sleep',
+  manual: 'mode_manual',
 };
 
 export function DashboardScreen() {
@@ -43,13 +44,15 @@ export function DashboardScreen() {
   const clearAlert = useDeviceStore((s) => s.clearAlert);
 
   const childName = useOnboardingStore((s) => s.childName);
+  const { format: formatTemp } = useTemperature();
+  const { t } = useTranslation();
   const roomType = useOnboardingStore((s) => s.roomType);
   const roomName = ROOM_DEVICE_MAP[roomType as RoomKey]?.name ?? 'Cihaz';
 
   const aqiCardBg = isAlertActive ? colors.redLight : colors.greenLight;
   const aqiCardBorder = isAlertActive ? colors.red : colors.green;
-  const aqiStatusText = isAlertActive ? 'Sağlıksız' : 'Temiz hava';
-  const aqiStatusLabel = isAlertActive ? 'Kritik' : 'Mükemmel';
+  const aqiStatusText = isAlertActive ? t('unhealthy') : t('clean_air');
+  const aqiStatusLabel = isAlertActive ? t('critical') : t('excellent');
 
   return (
     <SafeAreaView style={styles.container}>
@@ -62,9 +65,9 @@ export function DashboardScreen() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             {isAlertActive ? (
-              <Text style={styles.headerAlertLabel}>Uyarı var</Text>
+              <Text style={styles.headerAlertLabel}>{t('alert_present')}</Text>
             ) : (
-              <Text style={styles.headerGreeting}>Günaydın</Text>
+              <Text style={styles.headerGreeting}>{t('good_morning')}</Text>
             )}
             <Text style={styles.headerRoom}>{roomName}</Text>
           </View>
@@ -95,7 +98,8 @@ export function DashboardScreen() {
                 </View>
               </View>
               <Text style={styles.alertSubtitle}>
-                PM2.5: {pm25} μg · {childName} için kritik
+                PM2.5: {pm25} μg ·{' '}
+                {t('critical_for_child').replace('{name}', childName)}
               </Text>
               <View style={styles.alertButtons}>
                 <TouchableOpacity
@@ -103,14 +107,14 @@ export function DashboardScreen() {
                   onPress={() => setFanSpeed(4)}
                   activeOpacity={0.85}
                 >
-                  <Text style={styles.alertMaxBtnText}>Max güce geç</Text>
+                  <Text style={styles.alertMaxBtnText}>{t('max_power')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.alertDismissBtn}
                   onPress={clearAlert}
                   activeOpacity={0.85}
                 >
-                  <Text style={styles.alertDismissBtnText}>Yoksay</Text>
+                  <Text style={styles.alertDismissBtnText}>{t('dismiss')}</Text>
                 </TouchableOpacity>
               </View>
             </>
@@ -151,7 +155,7 @@ export function DashboardScreen() {
                 <View style={styles.metricDivider} />
                 <View style={styles.metricItem}>
                   <Text style={styles.metricValue}>{humidity}%</Text>
-                  <Text style={styles.metricLabel}>Nem</Text>
+                  <Text style={styles.metricLabel}>{t('humidity_short')}</Text>
                 </View>
               </View>
             </>
@@ -163,10 +167,10 @@ export function DashboardScreen() {
           <View style={styles.co2Card}>
             <View style={styles.co2CardLeft} />
             <View style={styles.co2CardContent}>
-              <Text style={styles.co2Title}>CO₂ uyarısı</Text>
-              <Text style={styles.co2Desc}>{co2} ppm · havalandırma önerilir</Text>
+              <Text style={styles.co2Title}>{t('co2_warning')}</Text>
+              <Text style={styles.co2Desc}>{co2} ppm · {t('co2_advice')}</Text>
               <TouchableOpacity>
-                <Text style={styles.co2Link}>Çözüm önerilerini gör →</Text>
+                <Text style={styles.co2Link}>{t('see_solutions')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -176,32 +180,32 @@ export function DashboardScreen() {
         <View style={styles.infoGrid}>
           <View style={styles.infoCard}>
             <Ionicons name="thermometer-outline" size={18} color={colors.textSecondary} />
-            <Text style={styles.infoValue}>{temperature}°C</Text>
-            <Text style={styles.infoLabel}>Sıcaklık</Text>
-            <Text style={styles.infoSub}>İdeal aralık</Text>
+            <Text style={styles.infoValue}>{formatTemp(temperature)}</Text>
+            <Text style={styles.infoLabel}>{t('temperature')}</Text>
+            <Text style={styles.infoSub}>{t('ideal_range')}</Text>
           </View>
           <View style={styles.infoCard}>
             <Ionicons name="speedometer-outline" size={18} color={colors.textSecondary} />
             <Text style={styles.infoValue}>{fanSpeed}/4</Text>
-            <Text style={styles.infoLabel}>Fan hızı</Text>
-            <Text style={styles.infoSub}>Otomatik</Text>
+            <Text style={styles.infoLabel}>{t('fan_speed')}</Text>
+            <Text style={styles.infoSub}>{t('mode_auto')}</Text>
           </View>
           <View style={styles.infoCard}>
             <Ionicons name="shield-checkmark-outline" size={18} color={colors.textSecondary} />
             <Text style={styles.infoValue}>{filterLife.hepa}%</Text>
-            <Text style={styles.infoLabel}>Filtre ömrü</Text>
-            <Text style={styles.infoSub}>~4 ay kaldı</Text>
+            <Text style={styles.infoLabel}>{t('filter_life')}</Text>
+            <Text style={styles.infoSub}>{t('months_left')}</Text>
           </View>
           <View style={styles.infoCard}>
             <Ionicons name="time-outline" size={18} color={colors.textSecondary} />
             <Text style={styles.infoValue}>14 s</Text>
-            <Text style={styles.infoLabel}>Çalışma</Text>
-            <Text style={styles.infoSub}>{totalRuntime} s toplam</Text>
+            <Text style={styles.infoLabel}>{t('runtime')}</Text>
+            <Text style={styles.infoSub}>{totalRuntime} s {t('total_suffix')}</Text>
           </View>
         </View>
 
         {/* Quick Control */}
-        <Text style={styles.sectionTitle}>Hızlı kontrol</Text>
+        <Text style={styles.sectionTitle}>{t('quick_control')}</Text>
         <View style={styles.modeRow}>
           {(['auto', 'sleep', 'manual'] as DeviceMode[]).map((m) => {
             const isActive = mode === m;
@@ -218,7 +222,7 @@ export function DashboardScreen() {
                   color={isActive ? colors.coral : colors.textSecondary}
                 />
                 <Text style={[styles.modeChipText, isActive && styles.modeChipTextActive]}>
-                  {MODE_LABELS[m]}
+                  {t(MODE_LABEL_KEYS[m])}
                 </Text>
               </TouchableOpacity>
             );

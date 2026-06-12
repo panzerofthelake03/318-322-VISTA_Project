@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { TouchableOpacity } from 'react-native';
 import Svg, { Polyline, Polygon, Line as SvgLine, Circle } from 'react-native-svg';
 import { weeklyAQI, monthlyAQI, hourlyPM25 } from '../../data/mockDevice';
+import { useTranslation } from '../../i18n';
 import { colors, spacing, fontSize, fontWeight, radius } from '../../theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -71,6 +72,7 @@ function BarChart({ data }: { data: AQIDatum[] }) {
 }
 
 function LineChart() {
+  const { t } = useTranslation();
   const threshold = 15;
   const maxValue = Math.max(...hourlyPM25.map((d) => d.value));
   const yMax = maxValue * 1.15; // headroom above the peak
@@ -101,14 +103,14 @@ function LineChart() {
           { position: 'absolute', top: Math.max(0, peak.y - 18), right: 0 },
         ]}
       >
-        maks {maxValue}μg
+        {t('max_label')} {maxValue}μg
       </Text>
 
       {/* Threshold label */}
       <Text
         style={[lineStyles.thresholdLabel, { top: thresholdY - 16 }]}
       >
-        eşik
+        {t('threshold')}
       </Text>
 
       <Svg width={w} height={h}>
@@ -153,18 +155,20 @@ function LineChart() {
 
 export function GraphScreen() {
   const [aqiPeriod, setAqiPeriod] = useState<'week' | 'month'>('week');
+  const { t, language } = useTranslation();
 
   const aqiData = aqiPeriod === 'week' ? weeklyAQI : monthlyAQI;
   const avgAQI = Math.round(
     aqiData.reduce((sum, d) => sum + d.value, 0) / aqiData.length
   );
 
+  const LOCALES = { tr: 'tr-TR', en: 'en-US', de: 'de-DE' } as const;
   const now = new Date();
-  const monthYear = now.toLocaleDateString('tr-TR', {
+  const monthYear = now.toLocaleDateString(LOCALES[language], {
     month: 'long',
     year: 'numeric',
   });
-  const periodLabel = aqiPeriod === 'week' ? monthYear : 'Son 30 gün';
+  const periodLabel = aqiPeriod === 'week' ? monthYear : t('last_30_days');
 
   return (
     <SafeAreaView style={styles.container}>
@@ -174,7 +178,7 @@ export function GraphScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <Text style={styles.screenTitle}>Grafik</Text>
+        <Text style={styles.screenTitle}>{t('graph')}</Text>
 
         {/* AQI Section */}
         <View style={styles.section}>
@@ -182,7 +186,7 @@ export function GraphScreen() {
             <View>
               <Text style={styles.sectionTitle}>AQI · {periodLabel}</Text>
               <Text style={styles.sectionSubtitle}>
-                ort. {avgAQI} · Ada için iyi
+                {t('avg_prefix')} {avgAQI} · {t('good_for_child')}
               </Text>
             </View>
             {/* Period toggle */}
@@ -192,7 +196,7 @@ export function GraphScreen() {
                 onPress={() => setAqiPeriod('week')}
               >
                 <Text style={[styles.periodText, aqiPeriod === 'week' && styles.periodTextActive]}>
-                  Hafta
+                  {t('week')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -200,7 +204,7 @@ export function GraphScreen() {
                 onPress={() => setAqiPeriod('month')}
               >
                 <Text style={[styles.periodText, aqiPeriod === 'month' && styles.periodTextActive]}>
-                  Ay
+                  {t('month')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -213,8 +217,8 @@ export function GraphScreen() {
 
         {/* PM2.5 Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>PM2.5 · 24 saat</Text>
-          <Text style={styles.sectionSubtitle}>Ada eşiği: 15μg</Text>
+          <Text style={styles.sectionTitle}>{t('pm25_24h')}</Text>
+          <Text style={styles.sectionSubtitle}>{t('child_threshold')}</Text>
 
           <LineChart />
         </View>
@@ -223,15 +227,15 @@ export function GraphScreen() {
         <View style={styles.summaryRow}>
           <View style={[styles.summaryCard, { borderLeftColor: colors.green }]}>
             <Text style={[styles.summaryValue, { color: colors.green }]}>87%</Text>
-            <Text style={styles.summaryLabel}>Temiz gün</Text>
+            <Text style={styles.summaryLabel}>{t('clean_day')}</Text>
           </View>
           <View style={[styles.summaryCard, { borderLeftColor: colors.amber }]}>
             <Text style={[styles.summaryValue, { color: colors.amber }]}>{avgAQI}</Text>
-            <Text style={styles.summaryLabel}>Ort. AQI</Text>
+            <Text style={styles.summaryLabel}>{t('avg_aqi')}</Text>
           </View>
           <View style={[styles.summaryCard, { borderLeftColor: colors.textSecondary }]}>
             <Text style={styles.summaryValue}>312 s</Text>
-            <Text style={styles.summaryLabel}>Çalışma</Text>
+            <Text style={styles.summaryLabel}>{t('runtime')}</Text>
           </View>
         </View>
       </ScrollView>

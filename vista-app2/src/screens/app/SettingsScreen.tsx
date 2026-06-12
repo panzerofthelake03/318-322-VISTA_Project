@@ -6,12 +6,16 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useOnboardingStore } from '../../store/onboardingStore';
+import { useSettingsStore, Language, TempUnit } from '../../store/settingsStore';
+import { useTranslation, LANGUAGE_LABELS, UNIT_LABELS } from '../../i18n';
 import { SettingsStackParamList } from '../../navigation/AppNavigator';
 import { colors, spacing, fontSize, fontWeight, radius } from '../../theme';
 
@@ -65,6 +69,109 @@ function SettingRow({
   );
 }
 
+const LANGUAGE_OPTIONS: Language[] = ['tr', 'en', 'de'];
+const UNIT_OPTIONS: TempUnit[] = ['C', 'F', 'K'];
+
+interface OptionPickerProps {
+  visible: boolean;
+  title: string;
+  options: Array<{ value: string; label: string }>;
+  selected: string;
+  onSelect: (value: string) => void;
+  onClose: () => void;
+}
+
+function OptionPicker({
+  visible,
+  title,
+  options,
+  selected,
+  onSelect,
+  onClose,
+}: OptionPickerProps) {
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <Pressable style={pickerStyles.backdrop} onPress={onClose}>
+        <Pressable style={pickerStyles.sheet} onPress={() => {}}>
+          <Text style={pickerStyles.title}>{title}</Text>
+          {options.map((option, i) => {
+            const isSelected = option.value === selected;
+            return (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  pickerStyles.option,
+                  i === options.length - 1 && { borderBottomWidth: 0 },
+                ]}
+                onPress={() => {
+                  onSelect(option.value);
+                  onClose();
+                }}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    pickerStyles.optionText,
+                    isSelected && pickerStyles.optionTextSelected,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+                {isSelected && (
+                  <Ionicons name="checkmark" size={20} color={colors.coral} />
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+const pickerStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
+  },
+  sheet: {
+    backgroundColor: colors.bg,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  title: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semiBold,
+    color: colors.textPrimary,
+    paddingVertical: spacing.sm,
+  },
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.md,
+    minHeight: 52,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  optionText: {
+    fontSize: fontSize.md,
+    color: colors.textPrimary,
+  },
+  optionTextSelected: {
+    color: colors.coral,
+    fontWeight: fontWeight.semiBold,
+  },
+});
+
 const rowStyles = StyleSheet.create({
   row: {
     flexDirection: 'row',
@@ -102,11 +209,20 @@ const rowStyles = StyleSheet.create({
 export function SettingsScreen() {
   const navigation = useNavigation<SettingsNavProp>();
   const childName = useOnboardingStore((s) => s.childName);
+  const { t } = useTranslation();
 
   const [locationPermission, setLocationPermission] = useState(true);
   const [pm25Alarm, setPm25Alarm] = useState(true);
   const [co2Warning, setCo2Warning] = useState(true);
   const [filterChange, setFilterChange] = useState(false);
+
+  const language = useSettingsStore((s) => s.language);
+  const setLanguage = useSettingsStore((s) => s.setLanguage);
+  const unit = useSettingsStore((s) => s.unit);
+  const setUnit = useSettingsStore((s) => s.setUnit);
+  const [activePicker, setActivePicker] = useState<'language' | 'unit' | null>(
+    null
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -117,7 +233,7 @@ export function SettingsScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.screenTitle}>Ayarlar</Text>
+          <Text style={styles.screenTitle}>{t('settings')}</Text>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
               {childName.charAt(0).toUpperCase()}
@@ -126,28 +242,30 @@ export function SettingsScreen() {
         </View>
 
         {/* UYGULAMA Section */}
-        <Text style={styles.sectionHeader}>UYGULAMA</Text>
+        <Text style={styles.sectionHeader}>{t('app_section')}</Text>
         <View style={styles.sectionCard}>
           <SettingRow
             icon="language-outline"
-            label="Dil"
-            value="Türkçe"
+            label={t('language')}
+            value={LANGUAGE_LABELS[language]}
             hasChevron
+            onPress={() => setActivePicker('language')}
           />
           <SettingRow
             icon="thermometer-outline"
-            label="Birimler"
-            value="Celsius"
+            label={t('units')}
+            value={UNIT_LABELS[unit]}
             hasChevron
+            onPress={() => setActivePicker('unit')}
           />
           <SettingRow
             icon="lock-closed-outline"
-            label="Gizlilik & Güvenlik"
+            label={t('privacy')}
             hasChevron
           />
           <SettingRow
             icon="location-outline"
-            label="Konum İzni"
+            label={t('location_permission')}
             switchValue={locationPermission}
             onSwitchChange={setLocationPermission}
           />
@@ -155,7 +273,7 @@ export function SettingsScreen() {
             <View style={rowStyles.iconContainer}>
               <Ionicons name="share-outline" size={18} color={colors.textSecondary} />
             </View>
-            <Text style={rowStyles.label}>Veri Paylaşımı</Text>
+            <Text style={rowStyles.label}>{t('data_sharing')}</Text>
             <View style={rowStyles.right}>
               <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
             </View>
@@ -163,7 +281,7 @@ export function SettingsScreen() {
         </View>
 
         {/* BİLDİRİMLER Section */}
-        <Text style={styles.sectionHeader}>BİLDİRİMLER</Text>
+        <Text style={styles.sectionHeader}>{t('notifications_section')}</Text>
         <View style={styles.sectionCard}>
           <TouchableOpacity
             style={notifStyles.notifRow}
@@ -173,15 +291,15 @@ export function SettingsScreen() {
             <View style={rowStyles.iconContainer}>
               <Ionicons name="notifications-outline" size={18} color={colors.textSecondary} />
             </View>
-            <Text style={[rowStyles.label, { flex: 1 }]}>Bildirimler</Text>
+            <Text style={[rowStyles.label, { flex: 1 }]}>{t('notifications')}</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <View style={styles.toggleSection}>
             <View style={toggleRowStyles.row}>
               <View style={styles.toggleTextContainer}>
-                <Text style={toggleRowStyles.title}>PM2.5 Alarmı</Text>
-                <Text style={toggleRowStyles.subtitle}>Eşik aşıldında bildir</Text>
+                <Text style={toggleRowStyles.title}>{t('pm25_alarm')}</Text>
+                <Text style={toggleRowStyles.subtitle}>{t('pm25_alarm_sub')}</Text>
               </View>
               <Switch
                 value={pm25Alarm}
@@ -192,8 +310,8 @@ export function SettingsScreen() {
             </View>
             <View style={toggleRowStyles.row}>
               <View style={styles.toggleTextContainer}>
-                <Text style={toggleRowStyles.title}>CO₂ Uyarısı</Text>
-                <Text style={toggleRowStyles.subtitle}>1000 ppm üzerinde</Text>
+                <Text style={toggleRowStyles.title}>{t('co2_warning')}</Text>
+                <Text style={toggleRowStyles.subtitle}>{t('co2_warning_sub')}</Text>
               </View>
               <Switch
                 value={co2Warning}
@@ -204,8 +322,8 @@ export function SettingsScreen() {
             </View>
             <View style={[toggleRowStyles.row, { borderBottomWidth: 0 }]}>
               <View style={styles.toggleTextContainer}>
-                <Text style={toggleRowStyles.title}>Filtre Değişimi</Text>
-                <Text style={toggleRowStyles.subtitle}>%20 altına düştüğünde</Text>
+                <Text style={toggleRowStyles.title}>{t('filter_change')}</Text>
+                <Text style={toggleRowStyles.subtitle}>{t('filter_change_sub')}</Text>
               </View>
               <Switch
                 value={filterChange}
@@ -218,11 +336,11 @@ export function SettingsScreen() {
         </View>
 
         {/* Device Info */}
-        <Text style={styles.sectionHeader}>CİHAZ</Text>
+        <Text style={styles.sectionHeader}>{t('device_section')}</Text>
         <View style={styles.sectionCard}>
           <SettingRow
             icon="hardware-chip-outline"
-            label="Cihaz Bilgileri"
+            label={t('device_info')}
             value="Vista Air"
             hasChevron
           />
@@ -230,13 +348,36 @@ export function SettingsScreen() {
             <View style={rowStyles.iconContainer}>
               <Ionicons name="help-circle-outline" size={18} color={colors.textSecondary} />
             </View>
-            <Text style={rowStyles.label}>Yardım ve Destek</Text>
+            <Text style={rowStyles.label}>{t('help_support')}</Text>
             <View style={rowStyles.right}>
               <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
             </View>
           </View>
         </View>
       </ScrollView>
+
+      <OptionPicker
+        visible={activePicker === 'language'}
+        title={t('language')}
+        options={LANGUAGE_OPTIONS.map((l) => ({
+          value: l,
+          label: LANGUAGE_LABELS[l],
+        }))}
+        selected={language}
+        onSelect={(v) => setLanguage(v as Language)}
+        onClose={() => setActivePicker(null)}
+      />
+      <OptionPicker
+        visible={activePicker === 'unit'}
+        title={t('units')}
+        options={UNIT_OPTIONS.map((u) => ({
+          value: u,
+          label: UNIT_LABELS[u],
+        }))}
+        selected={unit}
+        onSelect={(v) => setUnit(v as TempUnit)}
+        onClose={() => setActivePicker(null)}
+      />
     </SafeAreaView>
   );
 }

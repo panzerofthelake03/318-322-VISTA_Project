@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { useDeviceStore } from '../../store/deviceStore';
+import { useTranslation, TranslationKey } from '../../i18n';
 import { colors, spacing, fontSize, fontWeight, radius } from '../../theme';
 
 type DeviceMode = 'auto' | 'sleep' | 'manual';
@@ -24,11 +25,11 @@ type LightPreset = 'Sunrise' | 'Sunset' | 'Moonlight';
 const MODE_CONFIG: Array<{
   key: DeviceMode;
   icon: React.ComponentProps<typeof Ionicons>['name'];
-  label: string;
+  labelKey: TranslationKey;
 }> = [
-  { key: 'auto', icon: 'radio-button-on-outline', label: 'Otomatik' },
-  { key: 'sleep', icon: 'moon-outline', label: 'Uyku' },
-  { key: 'manual', icon: 'square-outline', label: 'Manuel' },
+  { key: 'auto', icon: 'radio-button-on-outline', labelKey: 'mode_auto' },
+  { key: 'sleep', icon: 'moon-outline', labelKey: 'mode_sleep' },
+  { key: 'manual', icon: 'square-outline', labelKey: 'mode_manual' },
 ];
 
 // Gradient fills for the light preset buttons (per Figma)
@@ -241,12 +242,13 @@ export function ControlScreen() {
   const toggleAutoProgram = useDeviceStore((s) => s.toggleAutoProgram);
   const waterLevel = useDeviceStore((s) => s.waterLevel);
   const humidity = useDeviceStore((s) => s.humidity);
+  const { t } = useTranslation();
 
   const FAN_LABELS: Record<number, string> = {
-    1: 'Sessiz',
-    2: 'Normal',
-    3: 'Güçlü',
-    4: 'Max',
+    1: t('fan_quiet'),
+    2: t('fan_normal'),
+    3: t('fan_strong'),
+    4: t('fan_max'),
   };
 
   return (
@@ -256,7 +258,7 @@ export function ControlScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.screenTitle}>Kontrol</Text>
+        <Text style={styles.screenTitle}>{t('control')}</Text>
 
         {/* Mode selector */}
         <View style={styles.modeRow}>
@@ -275,7 +277,7 @@ export function ControlScreen() {
                   color={isActive ? colors.white : colors.textSecondary}
                 />
                 <Text style={[styles.modeButtonText, isActive && styles.modeButtonTextActive]}>
-                  {cfg.label}
+                  {t(cfg.labelKey)}
                 </Text>
               </TouchableOpacity>
             );
@@ -284,7 +286,7 @@ export function ControlScreen() {
 
         {/* Fan hızı */}
         <View style={styles.sectionCard}>
-          <Text style={styles.sectionLabel}>Fan hızı</Text>
+          <Text style={styles.sectionLabel}>{t('fan_speed')}</Text>
           <View style={styles.segmentRow}>
             {([1, 2, 3, 4] as const).map((speed) => {
               const isActive = fanSpeed === speed;
@@ -311,7 +313,7 @@ export function ControlScreen() {
         <View style={styles.twoColRow}>
           {/* Water Level */}
           <View style={[styles.sectionCard, styles.halfCard]}>
-            <Text style={styles.sectionLabel}>Su Seviyesi</Text>
+            <Text style={styles.sectionLabel}>{t('water_level')}</Text>
             <View style={styles.waterTank}>
               <Text style={styles.waterPercent}>{waterLevel}%</Text>
               <LinearGradient
@@ -323,14 +325,14 @@ export function ControlScreen() {
 
           {/* Humidity */}
           <View style={[styles.sectionCard, styles.halfCard]}>
-            <Text style={styles.sectionLabel}>Nem Seviyesi</Text>
+            <Text style={styles.sectionLabel}>{t('humidity_level')}</Text>
             <View style={styles.humidityBody}>
               <View style={styles.humidityRow}>
                 <Ionicons name="water" size={30} color="#5B9BE0" />
                 <Text style={styles.humidityValue}>{humidity}%</Text>
               </View>
               <TouchableOpacity onPress={openWeatherApp}>
-                <Text style={styles.controlLink}>Kontrol et →</Text>
+                <Text style={styles.controlLink}>{t('check_it')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -338,7 +340,7 @@ export function ControlScreen() {
 
         {/* Hava Akışı */}
         <View style={styles.sectionCard}>
-          <Text style={styles.sectionLabel}>Hava Akışı</Text>
+          <Text style={styles.sectionLabel}>{t('air_flow')}</Text>
           <View style={styles.segmentRow}>
             {([1, 2, 3, 4] as const).map((flow) => {
               const isActive = airFlow === flow;
@@ -361,7 +363,7 @@ export function ControlScreen() {
         {/* Işık */}
         <View style={styles.sectionCard}>
           <View style={styles.lightHeader}>
-            <Text style={styles.sectionLabel}>Işık</Text>
+            <Text style={styles.sectionLabel}>{t('light')}</Text>
             <Switch
               value={lightOn}
               onValueChange={toggleLight}
@@ -409,26 +411,26 @@ export function ControlScreen() {
 
         {/* Ayarlar toggles */}
         <View style={styles.sectionCard}>
-          <Text style={[styles.sectionLabel, { marginBottom: spacing.xs }]}>Ayarlar</Text>
+          <Text style={[styles.sectionLabel, { marginBottom: spacing.xs }]}>{t('settings')}</Text>
 
           <ToggleRow
             icon="moon-outline"
-            title="Gece modu"
-            subtitle="Orb söner, fan 1 kademe"
+            title={t('night_mode')}
+            subtitle={t('night_mode_sub')}
             value={nightMode}
             onToggle={toggleNightMode}
           />
           <ToggleRow
             icon="heart-outline"
-            title="Bebek hassasiyeti"
-            subtitle="PM1.0 algılama aktif"
+            title={t('baby_sensitivity')}
+            subtitle={t('baby_sensitivity_sub')}
             value={babySensitivity}
             onToggle={toggleBabySensitivity}
           />
           <ToggleRow
             icon="alert-circle-outline"
-            title="VOC alarmı"
-            subtitle="Kimyasal gaz bildirimi"
+            title={t('voc_alarm')}
+            subtitle={t('voc_alarm_sub')}
             value={vocAlarm}
             onToggle={toggleVocAlarm}
           />
@@ -441,7 +443,7 @@ export function ControlScreen() {
               />
             </View>
             <View style={toggleStyles.textContainer}>
-              <Text style={toggleStyles.title}>Otomatik program</Text>
+              <Text style={toggleStyles.title}>{t('auto_program')}</Text>
             </View>
             <Switch
               value={autoProgram}

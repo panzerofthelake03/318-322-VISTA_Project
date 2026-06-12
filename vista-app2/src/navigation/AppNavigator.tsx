@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme';
+import { useTranslation } from '../i18n';
 import { DashboardScreen } from '../screens/app/DashboardScreen';
 import { GraphScreen } from '../screens/app/GraphScreen';
 import { ControlScreen } from '../screens/app/ControlScreen';
@@ -34,6 +35,7 @@ function SettingsNavigator() {
 }
 
 export function AppNavigator() {
+  const { t } = useTranslation();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -64,22 +66,22 @@ export function AppNavigator() {
       <Tab.Screen
         name="Dashboard"
         component={DashboardScreen}
-        options={{ tabBarLabel: 'Ana sayfa' }}
+        options={{ tabBarLabel: t('tab_home') }}
       />
       <Tab.Screen
         name="Graph"
         component={GraphScreen}
-        options={{ tabBarLabel: 'Grafik' }}
+        options={{ tabBarLabel: t('tab_graph') }}
       />
       <Tab.Screen
         name="Control"
         component={ControlScreen}
-        options={{ tabBarLabel: 'Kontrol' }}
+        options={{ tabBarLabel: t('tab_control') }}
       />
       <Tab.Screen
         name="SettingsStack"
         component={SettingsNavigator}
-        options={{ tabBarLabel: 'Ayarlar' }}
+        options={{ tabBarLabel: t('tab_settings') }}
       />
     </Tab.Navigator>
   );
