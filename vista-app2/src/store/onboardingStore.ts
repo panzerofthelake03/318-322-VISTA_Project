@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ROOM_DEVICE_MAP, RoomKey } from '../data/mockDevice';
 
 type UserProfile = 'baby' | 'child' | 'adult' | 'elderly';
@@ -22,7 +24,9 @@ interface OnboardingState {
   setHasPet: (v: boolean) => void;
 }
 
-export const useOnboardingStore = create<OnboardingState>((set) => ({
+export const useOnboardingStore = create<OnboardingState>()(
+  persist(
+    (set) => ({
   isOnboardingComplete: false,
   childName: 'Ada',
   childAge: 4,
@@ -58,6 +62,12 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
     const device = ROOM_DEVICE_MAP[r as RoomKey];
     set({ roomType: r, filterType: device?.filterType ?? 'HEPA H13' });
   },
-  setPmThreshold: (v) => set({ pmThreshold: v }),
-  setHasPet: (v) => set({ hasPet: v }),
-}));
+      setPmThreshold: (v) => set({ pmThreshold: v }),
+      setHasPet: (v) => set({ hasPet: v }),
+    }),
+    {
+      name: 'vista-onboarding',
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);

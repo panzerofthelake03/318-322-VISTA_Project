@@ -114,3 +114,92 @@
 {"_e":"metro:bundling:started","_t":1781287127413,"id":"2","platform":"android","environment":null,"entry":"index.ts"}
 {"_e":"metro:bundling:progress","_t":1781287127414,"id":"2","progress":0,"total":1,"current":0}
 {"_e":"metro:bundling:done","_t":1781287127478,"id":"2","total":1,"ms":64.5931}
+{"_e":"metro:client_log","_t":1781287896515,"level":"error","data":["[ReferenceError: Property 'PRESET_COLORS' doesn't exist]"]}
+{"_e":"metro:bundling:started","_t":1781288256653,"id":"5","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781288256653,"id":"5","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1781288256735,"id":"5","total":1,"ms":81.9908}
+{"_e":"metro:bundling:started","_t":1781288602975,"id":"8","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781288602975,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288602977,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288603214,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288603379,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288603477,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288603577,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288603680,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288603780,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288603880,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288603981,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288604082,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288604182,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288604282,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288604413,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288604523,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288604554,"id":"8","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1781288604739,"id":"8","total":1,"ms":1764.1011}
+{"_e":"metro:bundling:started","_t":1781288870095,"id":"a","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781288870095,"id":"a","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781288870096,"id":"a","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1781288870226,"id":"a","total":1,"ms":131.3761}
+{"_e":"metro:client_log","_t":1781288956614,"level":"error","data":["[ReferenceError: Property 'useState' doesn't exist]"]}
+{"_e":"metro:bundling:started","_t":1781289045150,"id":"e","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781289045150,"id":"e","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781289045152,"id":"e","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781289045251,"id":"e","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781289045306,"id":"e","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781289045406,"id":"e","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781289045509,"id":"e","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1781289045639,"id":"e","total":1,"ms":489.0699}
+{"_e":"metro:bundling:started","_t":1781290126783,"id":"f","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781290126783,"id":"f","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1781290126827,"id":"f","total":1,"ms":44.2018}
+{"_e":"metro:bundling:started","_t":1781290904917,"id":"g","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781290904917,"id":"g","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1781290904961,"id":"g","total":1,"ms":44.5625}
+{"_e":"metro:client_log","_t":1781291067895,"level":"error","data":["[ReferenceError: Property 'MODE_LABELS' doesn't exist]"]}
+{"_e":"metro:client_log","_t":1781291072940,"level":"error","data":["[ReferenceError: Property 'MODE_LABELS' doesn't exist]"]}
+{"_e":"metro:client_log","_t":1781291075248,"level":"error","data":["[ReferenceError: Property 'MODE_LABELS' doesn't exist]"]}
+{"_e":"metro:client_log","_t":1781291077544,"level":"error","data":["[ReferenceError: Property 'MODE_LABELS' doesn't exist]"]}
+{"_e":"metro:client_log","_t":1781291079559,"level":"error","data":["[ReferenceError: Property 'MODE_LABELS' doesn't exist]"]}
+{"_e":"metro:client_log","_t":1781291081293,"level":"error","data":["[ReferenceError: Property 'MODE_LABELS' doesn't exist]"]}
+{"_e":"metro:client_log","_t":1781291085008,"level":"error","data":["[ReferenceError: Property 'MODE_LABELS' doesn't exist]"]}
+{"_e":"metro:client_log","_t":1781291086525,"level":"error","data":["[ReferenceError: Property 'MODE_LABELS' doesn't exist]"]}
+{"_e":"metro:client_log","_t":1781291088816,"level":"error","data":["[ReferenceError: Property 'MODE_LABELS' doesn't exist]"]}
+{"_e":"metro:client_log","_t":1781291091248,"level":"error","data":["[ReferenceError: Property 'MODE_LABELS' doesn't exist]"]}
+{"_e":"metro:client_log","_t":1781291093141,"level":"error","data":["[ReferenceError: Property 'MODE_LABELS' doesn't exist]"]}
+{"_e":"metro:client_log","_t":1781291097580,"level":"error","data":["[ReferenceError: Property 'MODE_LABELS' doesn't exist]"]}
+{"_e":"metro:client_log","_t":1781291098663,"level":"error","data":["[ReferenceError: Property 'MODE_LABELS' doesn't exist]"]}
+{"_e":"metro:bundling:started","_t":1781291131421,"id":"17","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781291131421,"id":"17","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1781291131495,"id":"17","total":1,"ms":73.5572}
+{"_e":"metro:bundling:started","_t":1781291618795,"id":"18","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781291618796,"id":"18","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1781291618842,"id":"18","total":1,"ms":46.5024}
+{"_e":"metro:bundling:failed","_t":1781292206533,"id":null,"message":"SyntaxError: C:\\Users\\BARIS\\Desktop\\TNC_Projeler\\Mobil_Uygulama\\318-322-VISTA_Project\\vista-app2\\src\\store\\onboardingStore.ts: Unexpected token, expected \",\" (67:3)\n\n  65 |   setPmThreshold: (v) => set({ pmThreshold: v }),\n  66 |   setHasPet: (v) => set({ hasPet: v }),\n> 67 | }));\n     |    ^\n  68 |","importStack":null,"filename":"src\\store\\onboardingStore.ts","targetModuleName":null,"originModulePath":null}
+{"_e":"metro:bundling:failed","_t":1781292206723,"id":null,"message":"SyntaxError: C:\\Users\\BARIS\\Desktop\\TNC_Projeler\\Mobil_Uygulama\\318-322-VISTA_Project\\vista-app2\\src\\store\\onboardingStore.ts: Unexpected token, expected \",\" (67:3)\n\n  65 |   setPmThreshold: (v) => set({ pmThreshold: v }),\n  66 |   setHasPet: (v) => set({ hasPet: v }),\n> 67 | }));\n     |    ^\n  68 |","importStack":null,"filename":"src\\store\\onboardingStore.ts","targetModuleName":null,"originModulePath":null}
+{"_e":"metro:bundling:started","_t":1781292715482,"id":"1a","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781292715482,"id":"1a","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1781292715539,"id":"1a","total":1,"ms":57.3372}
+{"_e":"root:init","_t":1781292834761,"format":"v0-jsonl","version":"56.1.15"}
+{"_e":"env:mode","_t":1781292834763,"nodeEnv":"development","babelEnv":"development","mode":"development"}
+{"_e":"env:load","_t":1781292834766,"mode":"development","files":[],"env":{}}
+{"_e":"devserver:start","_t":1781292835068,"mode":"development","web":true,"baseUrl":"","asyncRoutes":false,"routerRoot":"../..\\..\\app","serverComponents":false,"serverActions":false,"serverRendering":false,"apiRoutes":false,"exporting":false}
+{"_e":"metro:config","_t":1781292835558,"serverRoot":"../..\\..","projectRoot":"../..\\..","exporting":false,"flags":{"autolinkingModuleResolution":false,"serverActions":false,"serverComponents":false,"reactCompiler":false,"optimizeGraph":false,"treeshaking":false,"logbox":false}}
+{"_e":"metro:instantiate","_t":1781292840826,"atlas":false,"workers":10,"host":"::","port":8081}
+{"_e":"metro:client_log","_t":1781292861767,"level":"error","data":["Project is incompatible with this version of Expo Go\n\nThis project requires a newer version of Expo Go.\n\nHow to fix this error:\nDownload the latest version of Expo Go from the Play Store."]}
+{"_e":"metro:client_log","_t":1781292881314,"level":"error","data":["Project is incompatible with this version of Expo Go\n\nThis project requires a newer version of Expo Go.\n\nHow to fix this error:\nDownload the latest version of Expo Go from the Play Store."]}
+{"_e":"metro:bundling:started","_t":1781293459753,"id":"5","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781293459754,"id":"5","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781293459761,"id":"5","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1781293459862,"id":"5","progress":0.11458855754021834,"total":322,"current":109}
+{"_e":"metro:bundling:progress","_t":1781293459962,"id":"5","progress":0.3324209104455744,"total":529,"current":305}
+{"_e":"metro:bundling:progress","_t":1781293460062,"id":"5","progress":0.4502884901119778,"total":763,"current":512}
+{"_e":"metro:bundling:progress","_t":1781293460162,"id":"5","progress":0.7346938775510203,"total":924,"current":792}
+{"_e":"metro:bundling:progress","_t":1781293460262,"id":"5","progress":0.7369038142714621,"total":1109,"current":952}
+{"_e":"metro:bundling:progress","_t":1781293460365,"id":"5","progress":0.9586361803538012,"total":1244,"current":1218}
+{"_e":"metro:bundling:done","_t":1781293460434,"id":"5","total":1244,"ms":680.2058}
+{"_e":"metro:bundling:started","_t":1781293683889,"id":"9","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781293683890,"id":"9","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1781293683928,"id":"9","total":1,"ms":37.7964}
+{"_e":"metro:bundling:started","_t":1781293685441,"id":"a","platform":"android","environment":null,"entry":"index.ts"}
+{"_e":"metro:bundling:progress","_t":1781293685441,"id":"a","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1781293685487,"id":"a","total":1,"ms":45.3693}

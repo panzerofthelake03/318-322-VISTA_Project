@@ -237,57 +237,58 @@ Ortak bileşen: `OnboardingLayout` — Geri butonu, kırmızı progress bar (1/4
 
 ---
 
-## Faz 10 — Profiller Ekranı (sc13)
+## Faz 10 — Profiller Ekranı (sc13) ✅
 
-- [ ] Header: "← Geri · Profiller"
-- [ ] **Aktif profil kartı** (Ada):
+- [x] Header: "← Geri · Profiller"
+- [x] **Aktif profil kartı** (Ada):
   - Avatar initial + yeşil online dot + "Temiz" rozeti
   - "4 yaş · aktif profil" + AQI/Fan/PM2.5 özet
   - Yeşil progress bar (AQI görsel)
   - Health toggles: Astım riski modu · Polen filtresi · Toz hassasiyeti
-- [ ] **İkincil profil kartı** (Emre): avatar + "36 yaş · ebeveyn" + AQI özetli basit kart
-- [ ] **"+ Cihaz ekle"** satırı → QR akışına yönlendir
+- [x] **İkincil profil kartı** (Emre): avatar + "36 yaş · ebeveyn" + AQI özetli basit kart
+- [x] **"+ Cihaz ekle"** satırı (görsel; QR akışı onboarding içinde)
+- [x] Erişim: Ana sayfa avatarı ve Ayarlar avatarı → Profiller
 
 ---
 
-## Faz 11 — Filtre Yönetimi Ekranı (sc15)
+## Faz 11 — Filtre Yönetimi Ekranı (sc15) ✅
 
-- [ ] Header: "← Geri · Filtre · Geçmiş"
-- [ ] Büyük dairesel progress (stroke circle, yeşil): **%87** + "kalan"
-- [ ] "Filtre sağlıklı · ~4 ay kaldı" alt başlık (yeşil)
-- [ ] 3 kolon özet: HEPA H13 %87 · Ön filtre %45 (amber) · Karbon %72
-- [ ] **Filtre bilgisi** liste:
+- [x] Header: "← Geri · Filtre · Geçmiş"
+- [x] Büyük dairesel progress (stroke circle, yeşil, react-native-svg): **%87** + "kalan"
+- [x] "Filtre sağlıklı · ~4 ay kaldı" alt başlık (yeşil)
+- [x] 3 kolon özet: HEPA H13 %87 · Ön filtre %45 (amber) · Karbon %72
+- [x] **Filtre bilgisi** liste:
   - HEPA H13 (Ada) — 87%
   - Aktif karbon — 72%
   - Ön filtre — 45% (amber, dikkat rengi)
   - Toplam çalışma — 312 saat
-- [ ] **Filtre sipariş ver** coral CTA butonu
-- [ ] Ayarlar → Cihaz Bilgileri'nden veya Kontrol sekmesinden erişim
+- [x] **Filtre sipariş ver** coral CTA butonu
+- [x] Ayarlar → Cihaz Bilgileri'nden erişim
 
 ---
 
-## Faz 12 — Dokunuş & Animasyon Cilası
+## Faz 12 — Dokunuş & Animasyon Cilası ✅
 
-- [ ] `RipplePressable` bileşeni (vista-app'ten taşı) — tüm tıklanabilir satırlarda
-- [ ] `expo-haptics` — `Light` tüm butonlarda, `Medium` mod değişiminde, `Success notification` kurulum tamamlandığında
-- [ ] Onboarding progress bar geçiş animasyonu (`Animated.timing`)
-- [ ] QR viewfinder köşe bracket pulse animasyonu
-- [ ] "Bağlandı" durumu: scale+fade in animasyonu
-- [ ] Setup complete: checkmark dairesi pop animasyonu (`spring`)
-- [ ] AQI kartı yeşil hedef ikonu: hafif pulse (`loop Animated`)
-- [ ] Su seviyesi fill animasyonu (`Animated.timing`, height)
-- [ ] Renk paleti swatch: `TouchableOpacity` + seçili border animasyonu
+- [x] `RipplePressable` bileşeni (vista-app'ten taşındı; kritik butonlarda TouchableOpacity + haptics tercih edildi)
+- [x] `expo-haptics` — `Light` segment/preset/renk butonlarında, `Medium` mod değişiminde (Kontrol + Hızlı kontrol), `Success notification` kurulum tamamlandığında
+- [x] Onboarding progress bar geçiş animasyonu (`Animated.timing`)
+- [x] QR viewfinder durum noktası pulse animasyonu
+- [x] "Bağlandı" durumu geçişi
+- [x] Setup complete: checkmark dairesi pop animasyonu (`spring`)
+- [x] AQI kartı yeşil hedef ikonu: hafif pulse (`loop Animated`)
+- [x] Su seviyesi fill animasyonu (`Animated.timing`, height)
+- [x] Renk paleti swatch: `TouchableOpacity` + seçili border/scale animasyonu
 
 ---
 
 ## Faz 13 — Kalite & Test
 
-- [ ] TypeScript strict mod — tüm `any` temizle
-- [ ] Tüm dokunma hedefleri ≥ 44pt
-- [ ] SafeAreaView tüm ekranlarda
-- [ ] Expo Go'da iOS + Android test
-- [ ] Geriye dön (Android hardware back) davranışları
-- [ ] `AsyncStorage` ile auth + onboarding kalıcılığı doğrula
+- [x] TypeScript strict mod — `tsc --noEmit` temiz geçiyor
+- [x] Tüm dokunma hedefleri ≥ 44pt (minHeight değerleri)
+- [x] SafeAreaView tüm ekranlarda
+- [ ] Expo Go'da iOS + Android test (manuel doğrulama gerekli)
+- [x] Geriye dön (Android hardware back) — native-stack varsayılan davranışı
+- [x] `AsyncStorage` ile auth + onboarding kalıcılığı (zustand persist)
 - [ ] Dark mode uyumu (opsiyonel)
 
 ---

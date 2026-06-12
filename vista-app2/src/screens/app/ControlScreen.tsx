@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,13 @@ import {
   Platform,
   Linking,
   Image,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as IntentLauncher from 'expo-intent-launcher';
+import * as Haptics from 'expo-haptics';
 import { useDeviceStore } from '../../store/deviceStore';
 import { useTranslation, TranslationKey } from '../../i18n';
 import { colors, spacing, fontSize, fontWeight, radius } from '../../theme';
@@ -83,6 +85,33 @@ const DOT_SIZE = 26;
 const DOT_RADIUS = COLOR_WELL_SIZE / 2 + DOT_SIZE / 2 + 6;
 const FAN_HEIGHT = DOT_RADIUS + DOT_SIZE;
 
+// Animated water tank: fill height eases to the current level
+function WaterTank({ level }: { level: number }) {
+  const fillAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(fillAnim, {
+      toValue: level,
+      duration: 800,
+      useNativeDriver: false,
+    }).start();
+  }, [level]);
+
+  const fillHeight = fillAnim.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%'],
+  });
+
+  return (
+    <View style={styles.waterTank}>
+      <Text style={styles.waterPercent}>{level}%</Text>
+      <Animated.View style={{ height: fillHeight, width: '100%' }}>
+        <LinearGradient colors={['#CFE6F8', '#7FB3E8']} style={{ flex: 1 }} />
+      </Animated.View>
+    </View>
+  );
+}
+
 // Top half of the color well image, shown as a semicircle,
 // with selectable color dots placed along its edge
 function ColorFan() {
@@ -121,7 +150,10 @@ function ColorFan() {
               },
               isSelected && fanStyles.dotSelected,
             ]}
-            onPress={() => setSelectedColor(color)}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setSelectedColor(color);
+            }}
             activeOpacity={0.8}
           />
         );
@@ -268,7 +300,10 @@ export function ControlScreen() {
               <TouchableOpacity
                 key={cfg.key}
                 style={[styles.modeButton, isActive && styles.modeButtonActive]}
-                onPress={() => setMode(cfg.key)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  setMode(cfg.key);
+                }}
                 activeOpacity={0.8}
               >
                 <Ionicons
@@ -294,7 +329,10 @@ export function ControlScreen() {
                 <TouchableOpacity
                   key={speed}
                   style={[styles.segment, isActive && styles.segmentActive]}
-                  onPress={() => setFanSpeed(speed)}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setFanSpeed(speed);
+                  }}
                   activeOpacity={0.8}
                 >
                   <Text style={[styles.segmentValue, isActive && styles.segmentValueActive]}>
@@ -314,13 +352,7 @@ export function ControlScreen() {
           {/* Water Level */}
           <View style={[styles.sectionCard, styles.halfCard]}>
             <Text style={styles.sectionLabel}>{t('water_level')}</Text>
-            <View style={styles.waterTank}>
-              <Text style={styles.waterPercent}>{waterLevel}%</Text>
-              <LinearGradient
-                colors={['#CFE6F8', '#7FB3E8']}
-                style={[styles.waterFill, { height: `${waterLevel}%` as any }]}
-              />
-            </View>
+            <WaterTank level={waterLevel} />
           </View>
 
           {/* Humidity */}
@@ -348,7 +380,10 @@ export function ControlScreen() {
                 <TouchableOpacity
                   key={flow}
                   style={[styles.segment, isActive && styles.segmentActive]}
-                  onPress={() => setAirFlow(flow)}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setAirFlow(flow);
+                  }}
                   activeOpacity={0.8}
                 >
                   <Text style={[styles.segmentValue, isActive && styles.segmentValueActive]}>
@@ -385,7 +420,10 @@ export function ControlScreen() {
                     <TouchableOpacity
                       key={preset}
                       style={[styles.presetButton, isActive && styles.presetButtonActive]}
-                      onPress={() => setLightPreset(preset)}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setLightPreset(preset);
+                      }}
                       activeOpacity={0.8}
                     >
                       <LinearGradient
@@ -575,9 +613,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     overflow: 'hidden',
     justifyContent: 'flex-end',
-  },
-  waterFill: {
-    width: '100%',
   },
   waterPercent: {
     position: 'absolute',

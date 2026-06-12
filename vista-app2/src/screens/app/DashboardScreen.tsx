@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Animated,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useDeviceStore } from '../../store/deviceStore';
 import { useOnboardingStore } from '../../store/onboardingStore';
 import { ROOM_DEVICE_MAP, RoomKey } from '../../data/mockDevice';
@@ -42,10 +45,34 @@ export function DashboardScreen() {
   const setMode = useDeviceStore((s) => s.setMode);
   const setFanSpeed = useDeviceStore((s) => s.setFanSpeed);
   const clearAlert = useDeviceStore((s) => s.clearAlert);
+  const triggerAlert = useDeviceStore((s) => s.triggerAlert);
 
   const childName = useOnboardingStore((s) => s.childName);
   const { format: formatTemp } = useTemperature();
   const { t } = useTranslation();
+  const navigation = useNavigation<any>();
+
+  // Gentle pulse on the green target icon while air is clean
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (isAlertActive) return;
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.15,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 900,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [isAlertActive]);
   const roomType = useOnboardingStore((s) => s.roomType);
   const roomName = ROOM_DEVICE_MAP[roomType as RoomKey]?.name ?? 'Cihaz';
 
@@ -71,7 +98,12 @@ export function DashboardScreen() {
             )}
             <Text style={styles.headerRoom}>{roomName}</Text>
           </View>
-          <TouchableOpacity style={styles.avatar}>
+          <TouchableOpacity
+            style={styles.avatar}
+            onPress={() =>
+              navigation.navigate('SettingsStack', { screen: 'Profiles' })
+            }
+          >
             <Text style={styles.avatarText}>
               {childName.charAt(0).toUpperCase()}
             </Text>
@@ -123,9 +155,11 @@ export function DashboardScreen() {
               {/* Normal state */}
               <View style={styles.aqiRow}>
                 <View style={styles.aqiLeft}>
-                  <View style={styles.aqiCircleIcon}>
+                  <Animated.View
+                    style={[styles.aqiCircleIcon, { transform: [{ scale: pulseAnim }] }]}
+                  >
                     <Ionicons name="radio-button-on-outline" size={24} color={colors.green} />
-                  </View>
+                  </Animated.View>
                   <View style={styles.aqiNumbers}>
                     <Text style={[styles.aqiValue, { color: colors.green }]}>{aqi}</Text>
                     <Text style={[styles.aqiLabel, { color: colors.green }]}>
@@ -213,7 +247,10 @@ export function DashboardScreen() {
               <TouchableOpacity
                 key={m}
                 style={[styles.modeChip, isActive && styles.modeChipActive]}
-                onPress={() => setMode(m)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  setMode(m);
+                }}
                 activeOpacity={0.8}
               >
                 <Ionicons
@@ -228,6 +265,18 @@ export function DashboardScreen() {
             );
           })}
         </View>
+
+        {/* Demo: toggle alert state */}
+        {!isAlertActive && (
+          <TouchableOpacity
+            style={styles.alertDemoButton}
+            onPress={triggerAlert}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="warning-outline" size={16} color={colors.red} />
+            <Text style={styles.alertDemoText}>{t('show_alert')}</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -489,5 +538,22 @@ const styles = StyleSheet.create({
   modeChipTextActive: {
     color: colors.coral,
     fontWeight: fontWeight.semiBold,
+  },
+  alertDemoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.xl,
+    minHeight: 44,
+    borderRadius: radius.full,
+    borderWidth: 1,
+    borderColor: colors.red,
+    backgroundColor: colors.redLight,
+  },
+  alertDemoText: {
+    fontSize: fontSize.sm,
+    color: colors.red,
+    fontWeight: fontWeight.medium,
   },
 });

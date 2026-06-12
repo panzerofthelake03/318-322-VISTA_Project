@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { OnboardingStackParamList } from '../../navigation/OnboardingNavigator';
@@ -32,6 +33,7 @@ export function SetupCompleteScreen({ navigation }: Props) {
   const roomName = ROOM_DEVICE_MAP[roomType as RoomKey]?.name ?? roomType;
 
   useEffect(() => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Animated.spring(scaleAnim, {
       toValue: 1,
       useNativeDriver: true,

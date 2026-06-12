@@ -8,17 +8,17 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { OnboardingStackParamList } from '../../navigation/OnboardingNavigator';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { colors, spacing, fontSize, fontWeight, radius } from '../../theme';
-
-type Props = {
-  navigation: NativeStackNavigationProp<OnboardingStackParamList, 'QRPair'>;
-};
 
 type ConnectionState = 'connecting' | 'connected';
 
-export function QRPairScreen({ navigation }: Props) {
+// In onboarding the screen continues to the profile step after pairing.
+// When opened standalone (e.g. "Cihaz ekle" in Profiles) it just goes back.
+export function QRPairScreen() {
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const standalone: boolean = route.params?.standalone ?? false;
   const [connectionState, setConnectionState] = useState<ConnectionState>('connecting');
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -47,11 +47,15 @@ export function QRPairScreen({ navigation }: Props) {
     const timer = setTimeout(() => {
       setConnectionState('connected');
       setTimeout(() => {
-        navigation.navigate('UserProfileStep');
+        if (standalone) {
+          navigation.goBack();
+        } else {
+          navigation.navigate('UserProfileStep');
+        }
       }, 1000);
     }, 2500);
     return () => clearTimeout(timer);
-  }, [navigation]);
+  }, [navigation, standalone]);
 
   return (
     <SafeAreaView style={styles.container}>

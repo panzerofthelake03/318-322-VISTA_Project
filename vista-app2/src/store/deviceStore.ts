@@ -3,6 +3,13 @@ import { ALL_ROOMS, ROOM_DEVICE_MAP, RoomKey } from '../data/mockDevice';
 
 type FanSpeed = 1 | 2 | 3 | 4;
 type DeviceMode = 'auto' | 'sleep' | 'manual';
+export type ProfileId = 'ada' | 'emre';
+
+// Each profile is bound to a device (room)
+export const PROFILE_ROOM_MAP: Record<ProfileId, RoomKey> = {
+  ada: 'baby_room',
+  emre: 'living',
+};
 
 interface DeviceState {
   aqi: number;
@@ -24,6 +31,8 @@ interface DeviceState {
   vocAlarm: boolean;
   autoProgram: boolean;
   rooms: typeof ALL_ROOMS;
+  activeProfile: ProfileId;
+  switchProfile: (p: ProfileId) => void;
   setFanSpeed: (s: FanSpeed) => void;
   setMode: (m: DeviceMode) => void;
   setAirFlow: (a: 1 | 2 | 3 | 4) => void;
@@ -35,9 +44,10 @@ interface DeviceState {
   toggleAutoProgram: () => void;
   switchRoom: (roomKey: RoomKey) => void;
   clearAlert: () => void;
+  triggerAlert: () => void;
 }
 
-export const useDeviceStore = create<DeviceState>((set) => ({
+export const useDeviceStore = create<DeviceState>((set, get) => ({
   ...ROOM_DEVICE_MAP.baby_room,
   fanSpeed: 2,
   mode: 'auto',
@@ -53,6 +63,12 @@ export const useDeviceStore = create<DeviceState>((set) => ({
   vocAlarm: true,
   autoProgram: true,
   rooms: ALL_ROOMS,
+  activeProfile: 'ada',
+
+  switchProfile: (p) => {
+    set({ activeProfile: p });
+    get().switchRoom(PROFILE_ROOM_MAP[p]);
+  },
 
   setFanSpeed: (s) => set({ fanSpeed: s }),
   setMode: (m) => set({ mode: m }),
@@ -87,6 +103,16 @@ export const useDeviceStore = create<DeviceState>((set) => ({
       co2: 612,
       isAlertActive: false,
       fanSpeed: 2,
+      mode: 'auto',
+    }),
+
+  triggerAlert: () =>
+    set({
+      aqi: 148,
+      pm25: 68,
+      co2: 1100,
+      isAlertActive: true,
+      fanSpeed: 4,
       mode: 'auto',
     }),
 }));

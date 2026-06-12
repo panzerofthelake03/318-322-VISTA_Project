@@ -234,11 +234,15 @@ export function SettingsScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.screenTitle}>{t('settings')}</Text>
-          <View style={styles.avatar}>
+          <TouchableOpacity
+            style={styles.avatar}
+            onPress={() => navigation.navigate('Profiles')}
+            activeOpacity={0.7}
+          >
             <Text style={styles.avatarText}>
               {childName.charAt(0).toUpperCase()}
             </Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* UYGULAMA Section */}
@@ -343,6 +347,7 @@ export function SettingsScreen() {
             label={t('device_info')}
             value="Vista Air"
             hasChevron
+            onPress={() => navigation.navigate('Filter')}
           />
           <View style={[rowStyles.row, { borderBottomWidth: 0 }]}>
             <View style={rowStyles.iconContainer}>

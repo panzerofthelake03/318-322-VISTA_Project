@@ -9,6 +9,9 @@ import { GraphScreen } from '../screens/app/GraphScreen';
 import { ControlScreen } from '../screens/app/ControlScreen';
 import { SettingsScreen } from '../screens/app/SettingsScreen';
 import { NotificationsScreen } from '../screens/app/NotificationsScreen';
+import { ProfilesScreen } from '../screens/app/ProfilesScreen';
+import { FilterScreen } from '../screens/app/FilterScreen';
+import { QRPairScreen } from '../screens/onboarding/QRPairScreen';
 
 export type AppTabParamList = {
   Dashboard: undefined;
@@ -20,6 +23,9 @@ export type AppTabParamList = {
 export type SettingsStackParamList = {
   Settings: undefined;
   Notifications: undefined;
+  Profiles: undefined;
+  Filter: undefined;
+  QRPair: { standalone: boolean };
 };
 
 const Tab = createBottomTabNavigator<AppTabParamList>();
@@ -30,6 +36,9 @@ function SettingsNavigator() {
     <SettingsStack.Navigator screenOptions={{ headerShown: false }}>
       <SettingsStack.Screen name="Settings" component={SettingsScreen} />
       <SettingsStack.Screen name="Notifications" component={NotificationsScreen} />
+      <SettingsStack.Screen name="Profiles" component={ProfilesScreen} />
+      <SettingsStack.Screen name="Filter" component={FilterScreen} />
+      <SettingsStack.Screen name="QRPair" component={QRPairScreen} />
     </SettingsStack.Navigator>
   );
 }
