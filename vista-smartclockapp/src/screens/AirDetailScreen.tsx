@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Colors, getAqiColor } from '../theme/colors';
 
@@ -71,12 +71,12 @@ const styles = StyleSheet.create({
   },
   backText: {
     color: Colors.textSecondary,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '500',
   },
   title: {
     color: Colors.textPrimary,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     marginBottom: 14,
     letterSpacing: 0.5,
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     color: Colors.textSecondary,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
   },
   metricRight: {
@@ -117,12 +117,12 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   metricValue: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
   },
   metricUnit: {
     color: Colors.textMuted,
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '400',
   },
   filterRow: {
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   },
   filterLabel: {
     color: Colors.textMuted,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '500',
     width: 30,
   },
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   filterPct: {
     color: Colors.aqiGood,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '600',
     width: 28,
     textAlign: 'right',
