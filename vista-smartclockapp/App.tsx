@@ -1,7 +1,7 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useRef, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  Platform, ScrollView, useWindowDimensions,
+  Platform, ScrollView, useWindowDimensions, PanResponder, Animated, Easing,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { WatchFrame } from './src/components/WatchFrame';
@@ -30,6 +30,9 @@ const NAV_ITEMS: { id: Screen; label: string }[] = [
   { id: 'filter',  label: 'Filtre' },
 ];
 
+const SWIPE_FLOW: Screen[] = ['face', 'mode', 'profile', 'notif', 'filter'];
+const SWIPE_THRESHOLD = 42;
+
 export default function App() {
   const [screen, setScreen]           = useState<Screen>('onboarding');
   const [presetIdx, setPresetIdx]     = useState(0);
@@ -37,30 +40,88 @@ export default function App() {
   const [filterView, setFilterView]   = useState<FilterState>('healthy');
   const [profileTab, setProfileTab]   = useState<ProfileTab>('genel');
   const { height: winH } = useWindowDimensions();
+  const slideX = useRef(new Animated.Value(0)).current;
 
   const preset = PRESETS[presetIdx];
   const { accent, border } = getLevelColors(preset.level as AqiLevel);
 
-  function goTo(s: Screen) { setScreen(s); }
+  function transitionTo(nextScreen: Screen, enterFrom: 'left' | 'right' = 'right') {
+    if (nextScreen === screen) return;
+
+    // Klasik push hissi: yeni ekran sağdan/ soldan içeri kayar.
+    const startX = enterFrom === 'right' ? 56 : -56;
+    slideX.stopAnimation();
+    slideX.setValue(startX);
+    setScreen(nextScreen);
+
+    Animated.timing(slideX, {
+      toValue: 0,
+      duration: 240,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }
+
+  function goTo(s: Screen) {
+    transitionTo(s, 'right');
+  }
+
+  function moveInSwipeFlow(direction: 'left' | 'right') {
+    const currentIdx = SWIPE_FLOW.indexOf(screen);
+    if (currentIdx === -1) return;
+
+    // Kullanıcı isteği: sola kaydırma ileri, sağa kaydırma geri
+    const targetIdx = direction === 'left' ? currentIdx + 1 : currentIdx - 1;
+    if (targetIdx < 0 || targetIdx >= SWIPE_FLOW.length) return;
+
+    const enterFrom: 'left' | 'right' = direction === 'left' ? 'right' : 'left';
+    transitionTo(SWIPE_FLOW[targetIdx], enterFrom);
+  }
+
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gestureState) => {
+      const isHorizontal = Math.abs(gestureState.dx) > 12 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+      return screen !== 'onboarding' && isHorizontal;
+    },
+    onPanResponderRelease: (_, gestureState) => {
+      if (gestureState.dx > SWIPE_THRESHOLD) {
+        // Sağ kaydırma: geri
+        moveInSwipeFlow('right');
+        return;
+      }
+
+      if (gestureState.dx < -SWIPE_THRESHOLD) {
+        // Sola kaydırma: ileri
+        moveInSwipeFlow('left');
+      }
+    },
+  });
 
   const watchContent = (
-    <WatchFrame accentColor={border}>
-      {screen === 'onboarding' && <OnboardingScreen onDone={() => setScreen('face')} />}
-      {screen === 'face'    && <WatchFaceScreen {...preset} onNavigate={goTo} />}
-      {screen === 'mode'    && <ModeScreen onBack={() => setScreen('face')} />}
-      {screen === 'profile' && <ProfileScreen tab={profileTab} onBack={() => setScreen('face')} />}
-      {screen === 'notif'   && (
-        <NotifScreen
-          view={notifView}
-          onBack={() => setScreen('face')}
-          onAction={(a) => {
-            if (a === 'maxPower') setScreen('mode');
-            if (a === 'filter')   setScreen('filter');
-          }}
-        />
-      )}
-      {screen === 'filter'  && <FilterScreen view={filterView} onBack={() => setScreen('face')} />}
-    </WatchFrame>
+    <View style={styles.watchGestureArea}>
+      <WatchFrame accentColor={border}>
+        <Animated.View
+          style={[styles.screenTransitionLayer, { transform: [{ translateX: slideX }] }]}
+          {...panResponder.panHandlers}
+        >
+          {screen === 'onboarding' && <OnboardingScreen onDone={() => transitionTo('face', 'right')} />}
+          {screen === 'face'    && <WatchFaceScreen {...preset} onNavigate={goTo} />}
+          {screen === 'mode'    && <ModeScreen onBack={() => transitionTo('face', 'left')} />}
+          {screen === 'profile' && <ProfileScreen tab={profileTab} onBack={() => transitionTo('face', 'left')} />}
+          {screen === 'notif'   && (
+            <NotifScreen
+              view={notifView}
+              onBack={() => transitionTo('face', 'left')}
+              onAction={(a) => {
+                if (a === 'maxPower') transitionTo('mode', 'right');
+                if (a === 'filter')   transitionTo('filter', 'right');
+              }}
+            />
+          )}
+          {screen === 'filter'  && <FilterScreen view={filterView} onBack={() => transitionTo('face', 'left')} />}
+        </Animated.View>
+      </WatchFrame>
+    </View>
   );
 
   const controls = (
@@ -167,20 +228,28 @@ export default function App() {
         </>
       )}
       {screen !== 'onboarding' && (
-        <View style={styles.navRow}>
-          {NAV_ITEMS.map((item) => {
-            const isActive = screen === item.id;
-            return (
-              <TouchableOpacity
-                key={item.id}
-                style={[styles.navBtn, isActive && { borderColor: accent }]}
-                onPress={() => setScreen(item.id)}
-                activeOpacity={0.75}
-              >
-                <Text style={[styles.navLabel, isActive && { color: accent }]}>{item.label}</Text>
-              </TouchableOpacity>
-            );
-          })}
+        <View style={styles.controlsSlot}>
+          <View style={styles.navRow}>
+            {NAV_ITEMS.map((item) => {
+              const isActive = screen === item.id;
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[styles.navBtn, isActive && { borderColor: accent }]}
+                  onPress={() => {
+                    const currentIdx = SWIPE_FLOW.indexOf(screen);
+                    const nextIdx = SWIPE_FLOW.indexOf(item.id);
+                    const enterFrom: 'left' | 'right' =
+                      nextIdx !== -1 && currentIdx !== -1 && nextIdx < currentIdx ? 'left' : 'right';
+                    transitionTo(item.id, enterFrom);
+                  }}
+                  activeOpacity={0.75}
+                >
+                  <Text style={[styles.navLabel, isActive && { color: accent }]}>{item.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
       )}
       {screen === 'onboarding' && (
@@ -237,9 +306,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   watchArea: {
-    flex: 1,
+    height: 390,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  watchGestureArea: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  screenTransitionLayer: {
+    flex: 1,
   },
   // Küçük ekran: ScrollView içeriği
   scrollContent: {
@@ -253,6 +329,10 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     gap: 10,
     alignItems: 'center',
+  },
+  controlsSlot: {
+    minHeight: 44,
+    justifyContent: 'flex-start',
   },
   controlsLabel: {
     color: Colors.textDimmer,
