@@ -9,6 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import * as Haptics from 'expo-haptics';
 import { colors, spacing, fontSize, fontWeight, radius } from '../../theme';
 
 type ConnectionState = 'connecting' | 'connected';
@@ -46,6 +47,7 @@ export function QRPairScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setConnectionState('connected');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setTimeout(() => {
         if (standalone) {
           navigation.goBack();
