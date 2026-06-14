@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '../store/authStore';
 import { useOnboardingStore } from '../store/onboardingStore';
 import { AuthNavigator } from './AuthNavigator';
@@ -11,32 +10,14 @@ export function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
 
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
-  const login = useAuthStore((s) => s.login);
-  const userName = useAuthStore((s) => s.userName);
-
+  const logout = useAuthStore((s) => s.logout);
   const isOnboardingComplete = useOnboardingStore((s) => s.isOnboardingComplete);
-  const completeOnboarding = useOnboardingStore((s) => s.completeOnboarding);
+  const resetOnboarding = useOnboardingStore((s) => s.resetOnboarding);
 
   useEffect(() => {
-    const seedFromStorage = async () => {
-      try {
-        const [loggedIn, onboarded] = await Promise.all([
-          AsyncStorage.getItem('isLoggedIn'),
-          AsyncStorage.getItem('onboardingCompleted'),
-        ]);
-        if (loggedIn === 'true') {
-          login(userName || 'Kullanıcı');
-        }
-        if (onboarded === 'true') {
-          completeOnboarding();
-        }
-      } catch (_) {
-        // ignore storage errors
-      } finally {
-        setIsReady(true);
-      }
-    };
-    seedFromStorage();
+    logout();
+    resetOnboarding();
+    setIsReady(true);
   }, []);
 
   if (!isReady) return null;

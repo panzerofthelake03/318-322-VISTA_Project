@@ -21,7 +21,7 @@ const LINE_CHART_HEIGHT = 150;
 type AQIDatum = { day: string; value: number };
 
 function getBarColor(value: number): { fill: string; cap: string } {
-  if (value > 100) return { fill: colors.redLight, cap: colors.red };
+  if (value > 90) return { fill: colors.redLight, cap: colors.red };
   if (value > 50) return { fill: colors.amberLight, cap: colors.amber };
   return { fill: colors.greenLight, cap: colors.green };
 }
