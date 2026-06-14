@@ -113,16 +113,16 @@ export function ProfilesScreen() {
         {/* Active profile card (bound device) */}
         <View style={styles.profileCard}>
           <View style={styles.profileTop}>
-            <View style={styles.avatarWrap}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {active.name.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-              <View style={[styles.onlineDot, { backgroundColor: statusColor }]} />
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>
+                {active.name.charAt(0).toUpperCase()}
+              </Text>
             </View>
             <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>{active.name}</Text>
+              <View style={styles.profileNameRow}>
+                <Text style={styles.profileName}>{active.name}</Text>
+                <View style={[styles.onlineDot, { backgroundColor: statusColor }]} />
+              </View>
               <Text style={styles.profileSub}>
                 {active.age} {t('age_suffix')} · {t('active_profile')}
               </Text>
@@ -275,8 +275,11 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     marginBottom: spacing.md,
   },
-  avatarWrap: {
-    position: 'relative',
+  profileNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: 2,
   },
   avatar: {
     width: 48,
@@ -294,14 +297,9 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   onlineDot: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: colors.surface,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
   },
   profileInfo: {
     flex: 1,
@@ -310,7 +308,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     fontWeight: fontWeight.semiBold,
     color: colors.textPrimary,
-    marginBottom: 2,
   },
   profileSub: {
     fontSize: fontSize.sm,

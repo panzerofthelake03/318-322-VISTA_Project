@@ -131,19 +131,16 @@ const styles = StyleSheet.create({
   },
   summaryContainer: {
     width: '100%',
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    overflow: 'hidden',
+    paddingHorizontal: spacing.lg,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.lg,
   },
   summaryRowBorder: {
-    borderBottomWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
   },
   summaryLabel: {
@@ -152,7 +149,6 @@ const styles = StyleSheet.create({
   },
   summaryValue: {
     fontSize: fontSize.md,
-    fontWeight: fontWeight.semiBold,
     color: colors.textPrimary,
   },
   bottomContainer: {

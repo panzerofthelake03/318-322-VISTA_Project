@@ -4,11 +4,14 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const LOGO = require('../../../assets/vista-logo.png');
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
-import { colors, spacing, fontSize, fontWeight, radius } from '../../theme';
+import { colors, spacing, fontSize, fontWeight, fonts, radius } from '../../theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<AuthStackParamList, 'Welcome'>;
@@ -18,22 +21,16 @@ export function WelcomeScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        {/* Logo area */}
-        <View style={styles.logoContainer}>
-          <View style={styles.logoOuter}>
-            <View style={styles.logoLeaf1} />
-            <View style={styles.logoLeaf2} />
-            <Text style={styles.logoLetter}>V</Text>
-          </View>
-        </View>
+        {/* Logo */}
+        <Image source={LOGO} style={styles.logoImg} resizeMode="contain" />
 
         {/* Title */}
         <Text style={styles.title}>Vista Air</Text>
         <Text style={styles.subtitle}>Temiz hava, güvenli büyüme</Text>
       </View>
 
-      {/* Bottom actions */}
-      <View style={styles.bottomContainer}>
+      {/* Bottom card + actions */}
+      <View style={styles.bottomCard}>
         <TouchableOpacity
           style={styles.ctaButton}
           onPress={() => navigation.navigate('Register')}
@@ -67,47 +64,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.lg,
   },
-  logoContainer: {
-    marginBottom: spacing.xxl,
-  },
-  logoOuter: {
-    width: 96,
-    height: 96,
-    backgroundColor: colors.coralLight,
-    borderRadius: radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  logoLeaf1: {
-    position: 'absolute',
-    width: 48,
-    height: 48,
-    backgroundColor: colors.coral,
-    borderRadius: 24,
-    top: 8,
-    left: 8,
-    opacity: 0.7,
-  },
-  logoLeaf2: {
-    position: 'absolute',
-    width: 40,
-    height: 40,
-    backgroundColor: '#5B8C5A',
-    borderRadius: 20,
-    bottom: 10,
-    right: 8,
-    opacity: 0.6,
-  },
-  logoLetter: {
-    fontSize: 36,
-    fontWeight: fontWeight.bold,
-    color: colors.white,
-    zIndex: 1,
+  logoImg: {
+    width: 130,
+    height: 130,
+    marginBottom: spacing.sm,
   },
   title: {
     fontSize: fontSize.xxxl,
-    fontWeight: fontWeight.bold,
+    fontFamily: fonts.bold,
     color: colors.textPrimary,
     marginBottom: spacing.sm,
     textAlign: 'center',
@@ -117,13 +81,17 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
   },
-  bottomContainer: {
+  bottomCard: {
+    backgroundColor: '#F5EDE8',
+    borderTopLeftRadius: 200,
+    borderTopRightRadius: 200,
     paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xxxl,
     paddingBottom: spacing.xxl,
     gap: spacing.md,
   },
   ctaButton: {
-    backgroundColor: colors.coral,
+    backgroundColor: '#C4705A',
     borderRadius: radius.lg,
     paddingVertical: spacing.lg,
     alignItems: 'center',
@@ -132,7 +100,7 @@ const styles = StyleSheet.create({
   },
   ctaText: {
     fontSize: fontSize.md,
-    fontWeight: fontWeight.semiBold,
+    fontFamily: fonts.semiBold,
     color: colors.white,
   },
   linkButton: {
@@ -147,6 +115,6 @@ const styles = StyleSheet.create({
   },
   linkTextBold: {
     color: colors.coral,
-    fontWeight: fontWeight.semiBold,
+    fontFamily: fonts.semiBold,
   },
 });

@@ -70,9 +70,9 @@ export function QRPairScreen() {
 
       <View style={styles.content}>
         {/* Title */}
-        <Text style={styles.title}>Cihaz eşleştir</Text>
+        <Text style={styles.title}>Cihazı eşleştir</Text>
         <Text style={styles.subtitle}>
-          Sunrise Air'in altındaki QR kodu okutun
+          Vista Air'in altındaki QR kodu okutun
         </Text>
 
         {/* QR Viewfinder */}

@@ -43,6 +43,13 @@ export const fontWeight = {
   bold: '700' as const,
 };
 
+export const fonts = {
+  regular:  'Inter_400Regular',
+  medium:   'Inter_500Medium',
+  semiBold: 'Inter_600SemiBold',
+  bold:     'Inter_700Bold',
+};
+
 export const radius = {
   sm: 8,
   md: 12,

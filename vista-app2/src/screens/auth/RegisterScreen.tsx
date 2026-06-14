@@ -178,19 +178,25 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   brandTitle: {
-    fontSize: fontSize.xl,
+    alignSelf: 'center',
+    fontSize: fontSize.xxl,
     fontWeight: fontWeight.bold,
     color: colors.coral,
     marginBottom: spacing.sm,
   },
   welcomeText: {
-    fontSize: fontSize.xxl,
+    alignSelf: 'center',
+    fontSize: fontSize.xl,
+    marginTop: -7,
     fontWeight: fontWeight.bold,
     color: colors.textPrimary,
     marginBottom: spacing.xs,
   },
   subtitle: {
+    alignSelf: 'center',
     fontSize: fontSize.md,
+    marginTop: 5,
+    marginBottom: -10,
     color: colors.textSecondary,
   },
   oauthButton: {
