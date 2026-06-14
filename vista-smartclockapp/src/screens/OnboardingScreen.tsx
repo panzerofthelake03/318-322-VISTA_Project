@@ -1,9 +1,12 @@
 ﻿import React, { useEffect, useRef, useState } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet,
-  NativeSyntheticEvent, NativeScrollEvent, Animated, Vibration,
+  NativeSyntheticEvent, NativeScrollEvent, Animated, Vibration, Image,
 } from 'react-native';
 import { Colors } from '../theme/colors';
+
+const LOGO      = require('../../assets/vista-logo.png');
+const WORDMARK  = require('../../assets/vista-wordmark.png');
 
 interface Props {
   onDone: () => void;
@@ -32,26 +35,17 @@ const ds = StyleSheet.create({
 function WelcomeStep({ onNext }: { onNext: () => void }) {
   return (
     <View style={s.page}>
-      <View style={s.flex12} />
+      <View style={s.flex2} />
 
-      <View style={s.outerRing}>
-        <View style={s.innerRing}>
-          <View style={s.rayV} />
-          <View style={s.rayH} />
-          <View style={s.sunCenter} />
-        </View>
-      </View>
-
-      <Text style={s.brandTitle}>Sunrise Air</Text>
+      <Image source={LOGO} style={s.logoImg} resizeMode="contain" />
+      <Image source={WORDMARK} style={s.wordmarkImg} resizeMode="contain" />
       <Text style={s.brandSub}>Temiz hava, güvenli büyüme</Text>
 
-      <View style={s.flex2} />
+      <View style={s.flex4} />
 
       <TouchableOpacity style={s.startBtn} onPress={onNext} activeOpacity={0.75}>
         <Text style={s.startBtnText}>Başla →</Text>
       </TouchableOpacity>
-
-      <View style={s.flex1} />
     </View>
   );
 }
@@ -151,10 +145,10 @@ function PairingStep({ onNext, isActive }: { onNext: () => void; isActive: boole
         {connected ? 'Bağlandı!' : 'Bağlanıyor...'}
       </Text>
       {connected ? (
-        <Text style={s.dimText}>Sunrise Air cihazı hazır</Text>
+        <Text style={s.dimText}>VISTA cihazı hazır</Text>
       ) : (
         <>
-          <Text style={s.dimText}>Sunrise Air cihazınızı</Text>
+          <Text style={s.dimText}>VISTA cihazınızı</Text>
           <Text style={s.dimText}>telefona yaklaştırın</Text>
         </>
       )}
@@ -303,8 +297,8 @@ const s = StyleSheet.create({
     paddingHorizontal: 11,
   },
   flex1:  { flex: 1 },
-  flex12: { flex: 1.2 },
   flex2:  { flex: 2 },
+  flex4:  { flex: 4 },
 
   // Sabit dots çubuğu
   dotsBar: {
@@ -315,21 +309,14 @@ const s = StyleSheet.create({
   },
 
   // Karşılama
-  outerRing: {
-    width: 64, height: 64, borderRadius: 32,
-    borderWidth: 1, borderColor: 'rgba(224,120,96,0.38)',
-    alignItems: 'center', justifyContent: 'center',
+  logoImg: {
+    width: 72, height: 72, marginBottom: -19,
   },
-  innerRing: {
-    width: 52, height: 52, borderRadius: 26,
-    borderWidth: 1, borderColor: 'rgba(224,120,96,0.20)',
-    alignItems: 'center', justifyContent: 'center',
+  wordmarkImg: {
+    width: 200, height: 72,
+    marginTop: 6,
   },
-  rayV:      { position: 'absolute', width: 1.5, height: 14, borderRadius: 1, backgroundColor: 'rgba(224,120,96,0.65)' },
-  rayH:      { position: 'absolute', width: 14,  height: 1.5, borderRadius: 1, backgroundColor: 'rgba(224,120,96,0.65)' },
-  sunCenter: { width: 7, height: 7, borderRadius: 4, backgroundColor: 'rgba(224,120,96,0.55)' },
-  brandTitle: { color: Colors.textPrimary, fontSize: 17, fontWeight: '400', marginTop: 8 },
-  brandSub:   { color: Colors.textDimmer,  fontSize: 9,  marginTop: 3 },
+  brandSub: { color: Colors.textDimmer, fontSize: 10, marginTop: -24, marginBottom: 12, textAlign: 'center' },
 
   startBtn: {
     width: '100%', paddingVertical: 6, borderRadius: 11,
@@ -363,9 +350,8 @@ const s = StyleSheet.create({
   dimText:   { color: Colors.textDimmer, fontSize: 11, lineHeight: 15 },
   chip: {
     flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 10,
-    backgroundColor: 'rgba(237,232,223,0.06)', borderRadius: 15,
-    paddingHorizontal: 12, paddingVertical: 5,
-    borderWidth: 1, borderColor: 'rgba(237,232,223,0.12)',
+    backgroundColor: '#E0786012', borderRadius: 10,
+    paddingHorizontal: 26, paddingVertical: 5,
   },
   chipDot:  { width: 7, height: 7, borderRadius: 4, backgroundColor: Colors.coralText },
   chipText: { color: 'rgba(237,232,223,0.45)', fontSize: 13 },
@@ -407,8 +393,8 @@ const s = StyleSheet.create({
   profileDetailDim:   { color: 'rgba(237,232,223,0.25)',  fontSize: 11, marginTop: 1 },
   addRow: {
     width: '100%', flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: 'rgba(237,232,223,0.04)', borderRadius: 8,
-    padding: 8, borderWidth: 1, borderColor: 'rgba(237,232,223,0.08)',
+    backgroundColor: 'rgba(237, 232, 223, 0.03)', borderRadius: 8,
+    padding: 8, borderWidth: 1, borderColor: 'rgba(237,232,223,0.08)', borderStyle: 'dashed',
   },
   addIcon: {
     width: 22, height: 22, borderRadius: 11,

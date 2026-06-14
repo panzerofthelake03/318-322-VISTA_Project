@@ -7,7 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { WatchFrame } from './src/components/WatchFrame';
 import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { WatchFaceScreen, WatchData } from './src/screens/WatchFaceScreen';
-import { ModeScreen } from './src/screens/ModeScreen';
+import { ModeScreen, ActiveMode } from './src/screens/ModeScreen';
 import { ProfileScreen, ProfileTab } from './src/screens/ProfileScreen';
 import { NotifScreen, NotifView } from './src/screens/NotifScreen';
 import { FilterScreen, FilterState } from './src/screens/FilterScreen';
@@ -106,7 +106,14 @@ export default function App() {
         >
           {screen === 'onboarding' && <OnboardingScreen onDone={() => transitionTo('face', 'right')} />}
           {screen === 'face'    && <WatchFaceScreen {...preset} onNavigate={goTo} />}
-          {screen === 'mode'    && <ModeScreen onBack={() => transitionTo('face', 'left')} />}
+          {screen === 'mode'    && (
+            <ModeScreen
+              onBack={() => transitionTo('face', 'left')}
+              onModeChange={(m: ActiveMode) => {
+                if (m === 'uyku') setPresetIdx(3);
+              }}
+            />
+          )}
           {screen === 'profile' && <ProfileScreen tab={profileTab} onBack={() => transitionTo('face', 'left')} />}
           {screen === 'notif'   && (
             <NotifScreen

@@ -5,11 +5,12 @@ import {
 } from 'react-native';
 import { Colors } from '../theme/colors';
 
+export type ActiveMode = 'otomatik' | 'uyku' | 'bebek' | 'manuel';
+
 interface Props {
   onBack: () => void;
+  onModeChange?: (mode: ActiveMode) => void;
 }
-
-type ActiveMode = 'otomatik' | 'uyku' | 'bebek' | 'manuel';
 
 const MODES: { id: ActiveMode; label: string }[] = [
   { id: 'otomatik', label: 'Otomatik' },
@@ -191,9 +192,14 @@ function ScheduleView({ onBack }: { onBack: () => void }) {
 }
 
 // ─── Mod görünümü ─────────────────────────────────────────────────────────────
-export function ModeScreen({ onBack }: Props) {
+export function ModeScreen({ onBack, onModeChange }: Props) {
   const [showSchedule, setShowSchedule] = useState(false);
   const [mode, setMode]       = useState<ActiveMode>('otomatik');
+
+  function handleModeSelect(id: ActiveMode) {
+    setMode(id);
+    onModeChange?.(id);
+  }
   const [fanLevel, setFanLevel] = useState(2);
   const [nightMode, setNightMode] = useState(true);
   const [babyMode,  setBabyMode]  = useState(true);
@@ -236,7 +242,7 @@ export function ModeScreen({ onBack }: Props) {
             <TouchableOpacity
               key={id}
               style={[s.modeCard, active && s.modeCardActive]}
-              onPress={() => setMode(id)}
+              onPress={() => handleModeSelect(id)}
               activeOpacity={0.75}
             >
               <Text style={[s.modeCardText, active && s.modeCardTextActive]}>
