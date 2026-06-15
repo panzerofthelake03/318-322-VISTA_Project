@@ -1,14 +1,23 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 
 interface WatchFrameProps {
   children: React.ReactNode;
   accentColor?: string;
+  /** Büyük yan buton (Digital Crown) basıldığında */
+  onTopButton?: () => void;
+  /** Küçük yan buton basıldığında */
+  onBottomButton?: () => void;
 }
 
 // Figma watch border-radius: 28px; proportions: 166×326 → 186×356
 // Sağ taraftaki küçük dikdörtgenler fiziksel saat butonlarını temsil eder
-export function WatchFrame({ children, accentColor = '#4A9E72' }: WatchFrameProps) {
+export function WatchFrame({
+  children,
+  accentColor = '#4A9E72',
+  onTopButton,
+  onBottomButton,
+}: WatchFrameProps) {
   return (
     <View style={styles.host}>
       {/* Üst bant tutacağı */}
@@ -22,10 +31,20 @@ export function WatchFrame({ children, accentColor = '#4A9E72' }: WatchFrameProp
           </View>
         </View>
 
-        {/* Sağ taraf fiziksel butonlar */}
+        {/* Sağ taraf fiziksel butonlar — dokunulabilir */}
         <View style={styles.buttons}>
-          <View style={[styles.button, styles.buttonLarge]} />
-          <View style={[styles.button, styles.buttonSmall]} />
+          <TouchableOpacity
+            onPress={onTopButton}
+            style={[styles.button, styles.buttonLarge]}
+            activeOpacity={0.5}
+            hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
+          />
+          <TouchableOpacity
+            onPress={onBottomButton}
+            style={[styles.button, styles.buttonSmall]}
+            activeOpacity={0.5}
+            hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
+          />
         </View>
       </View>
 

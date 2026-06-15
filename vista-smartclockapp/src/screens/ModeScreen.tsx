@@ -1,7 +1,7 @@
 ﻿import React, { useRef, useState } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  Switch, ScrollView, PanResponder, Vibration,
+  Switch, ScrollView, Vibration,
 } from 'react-native';
 import { Colors } from '../theme/colors';
 
@@ -46,23 +46,19 @@ const THUMB = 18; // thumb genişliği/yüksekliği
 function FanSlider({ level, onChange }: { level: number; onChange: (n: number) => void }) {
   const [trackW, setTrackW] = useState(0);
   const trackWRef    = useRef(0);
-  const trackXRef    = useRef(0);
-  const prevLevelRef = useRef(level);  // adım takibi — titreşim için
+  const prevLevelRef = useRef(level);
   const onChangeRef  = useRef(onChange);
-  const containerRef = useRef<View>(null);
 
-  // onChange her render'da güncel kalsın
   onChangeRef.current = onChange;
 
-  function clamp(pageX: number): number {
+  function clamp(locationX: number): number {
     const usable = trackWRef.current - THUMB;
-    const rel    = Math.max(0, Math.min(usable, pageX - trackXRef.current));
+    const rel    = Math.max(0, Math.min(usable, locationX - THUMB / 2));
     return Math.max(1, Math.min(5, Math.round((rel / usable) * 4) + 1));
   }
 
-  // Adım değişiminde kısa titreşim
-  function handleStep(pageX: number) {
-    const next = clamp(pageX);
+  function handleStep(locationX: number) {
+    const next = clamp(locationX);
     if (next !== prevLevelRef.current) {
       Vibration.vibrate(35);
       prevLevelRef.current = next;
@@ -70,42 +66,32 @@ function FanSlider({ level, onChange }: { level: number; onChange: (n: number) =
     onChangeRef.current(next);
   }
 
-  const pan = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder:  () => true,
-      onPanResponderGrant: (e) => handleStep(e.nativeEvent.pageX),
-      onPanResponderMove:  (e) => handleStep(e.nativeEvent.pageX),
-    })
-  ).current;
-
   const usable   = trackW - THUMB;
   const thumbPos = usable > 0 ? ((level - 1) / 4) * usable : 0;
 
   return (
     <View>
       <View
-        ref={containerRef}
         style={sl.wrap}
         onLayout={(e) => {
           const w = e.nativeEvent.layout.width;
           setTrackW(w);
           trackWRef.current = w;
-          containerRef.current?.measure((_fx, _fy, _w, _h, px) => {
-            trackXRef.current = px;
-          });
         }}
-        {...pan.panHandlers}
+        onStartShouldSetResponder={() => true}
+        onMoveShouldSetResponder={() => true}
+        onResponderGrant={(e) => handleStep(e.nativeEvent.locationX)}
+        onResponderMove={(e) => handleStep(e.nativeEvent.locationX)}
       >
         <View style={sl.track} />
         <View style={[sl.fill, { width: thumbPos + THUMB / 2 }]} />
         <View style={[sl.thumb, { left: thumbPos }]} />
       </View>
       <View style={sl.labels}>
-        {[0, 1, 2, 3, 4].map((n) => (
+        {[1, 2, 3, 4, 5].map((n) => (
           <Text
             key={n}
-            style={[sl.labelText, n === level - 1 && sl.labelActive]}
+            style={[sl.labelText, n === level && sl.labelActive]}
           >
             {n}
           </Text>

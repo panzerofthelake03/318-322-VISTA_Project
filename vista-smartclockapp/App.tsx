@@ -11,9 +11,11 @@ import { ModeScreen, ActiveMode } from './src/screens/ModeScreen';
 import { ProfileScreen, ProfileTab } from './src/screens/ProfileScreen';
 import { NotifScreen, NotifView } from './src/screens/NotifScreen';
 import { FilterScreen, FilterState } from './src/screens/FilterScreen';
+import { AppGridScreen } from './src/screens/AppGridScreen';
+import { ClockFaceScreen } from './src/screens/ClockFaceScreen';
 import { Colors, AqiLevel, getLevelColors } from './src/theme/colors';
 
-type Screen = 'onboarding' | 'face' | 'mode' | 'profile' | 'notif' | 'filter';
+type Screen = 'onboarding' | 'face' | 'apps' | 'clock' | 'mode' | 'profile' | 'notif' | 'filter';
 
 const PRESETS: (WatchData & { label: string })[] = [
   { label: 'İyi',  aqi: 32,  pm25: 8,  co2: 612,  humidity: 58, temp: 22, filter: 87, fan: 4, profile: 'Ada', room: 'çocuk odası', level: 'good' },
@@ -41,25 +43,40 @@ export default function App() {
   const [profileTab, setProfileTab]   = useState<ProfileTab>('genel');
   const { height: winH } = useWindowDimensions();
   const slideX = useRef(new Animated.Value(0)).current;
+  const slideY = useRef(new Animated.Value(0)).current;
 
   const preset = PRESETS[presetIdx];
   const { accent, border } = getLevelColors(preset.level as AqiLevel);
 
-  function transitionTo(nextScreen: Screen, enterFrom: 'left' | 'right' = 'right') {
+  function transitionTo(nextScreen: Screen, enterFrom: 'left' | 'right' | 'top' | 'bottom' = 'right') {
     if (nextScreen === screen) return;
 
-    // Klasik push hissi: yeni ekran sağdan/ soldan içeri kayar.
-    const startX = enterFrom === 'right' ? 56 : -56;
     slideX.stopAnimation();
-    slideX.setValue(startX);
-    setScreen(nextScreen);
+    slideY.stopAnimation();
 
-    Animated.timing(slideX, {
-      toValue: 0,
-      duration: 240,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
+    if (enterFrom === 'top' || enterFrom === 'bottom') {
+      // Dikey geçiş: yatay sıfırla, dikey başlat
+      slideX.setValue(0);
+      slideY.setValue(enterFrom === 'top' ? -60 : 60);
+      setScreen(nextScreen);
+      Animated.timing(slideY, {
+        toValue: 0,
+        duration: 280,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    } else {
+      // Yatay geçiş: dikey sıfırla, yatay başlat
+      slideY.setValue(0);
+      slideX.setValue(enterFrom === 'right' ? 56 : -56);
+      setScreen(nextScreen);
+      Animated.timing(slideX, {
+        toValue: 0,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    }
   }
 
   function goTo(s: Screen) {
@@ -80,32 +97,82 @@ export default function App() {
 
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: (_, gestureState) => {
+      if (screen === 'onboarding') return false;
+      // Saat ekranında aşağı kaydırmayı da yakala
+      if (screen === 'clock') {
+        return Math.abs(gestureState.dy) > 10 || Math.abs(gestureState.dx) > 12;
+      }
       const isHorizontal = Math.abs(gestureState.dx) > 12 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
-      return screen !== 'onboarding' && isHorizontal;
+      return isHorizontal;
     },
     onPanResponderRelease: (_, gestureState) => {
-      if (gestureState.dx > SWIPE_THRESHOLD) {
-        // Sağ kaydırma: geri
-        moveInSwipeFlow('right');
+      // Saat ekranı: aşağı kaydırınca apps grid'e git (yukarıdan aşağı animasyon)
+      if (screen === 'clock' && gestureState.dy > SWIPE_THRESHOLD) {
+        transitionTo('apps', 'top');
         return;
       }
 
+      if (gestureState.dx > SWIPE_THRESHOLD) {
+        moveInSwipeFlow('right');
+        return;
+      }
       if (gestureState.dx < -SWIPE_THRESHOLD) {
-        // Sola kaydırma: ileri
         moveInSwipeFlow('left');
       }
     },
   });
 
+  // Navigasyon üçgeni:
+  //   VISTA Uygulama  ─── yan tuş ───►  Apps Grid
+  //   Apps Grid       ─── yan tuş ───►  Saat Ekranı
+  //   Saat Ekranı     ─── yan tuş ───►  Apps Grid
+  function handleTopButton() {
+    if (screen === 'clock') {
+      // Saat → Apps (yukarıdan aşağı)
+      transitionTo('apps', 'top');
+    } else if (screen === 'apps') {
+      // Apps → Saat
+      transitionTo('clock', 'right');
+    } else {
+      // VISTA uygulama ekranları → Apps
+      transitionTo('apps', 'right');
+    }
+  }
+
+  // Küçük yan buton: her yerden VISTA ana ekranına dön
+  function handleBottomButton() {
+    if (screen !== 'face' && screen !== 'onboarding') {
+      transitionTo('face', 'left');
+    }
+  }
+
   const watchContent = (
     <View style={styles.watchGestureArea}>
-      <WatchFrame accentColor={border}>
+      <WatchFrame
+        accentColor={border}
+        onTopButton={handleTopButton}
+        onBottomButton={handleBottomButton}
+      >
         <Animated.View
-          style={[styles.screenTransitionLayer, { transform: [{ translateX: slideX }] }]}
+          style={[styles.screenTransitionLayer, { transform: [{ translateX: slideX }, { translateY: slideY }] }]}
           {...panResponder.panHandlers}
         >
           {screen === 'onboarding' && <OnboardingScreen onDone={() => transitionTo('face', 'right')} />}
+          {screen === 'clock'   && (
+            <ClockFaceScreen
+              aqi={preset.aqi}
+              temp={preset.temp}
+              humidity={preset.humidity}
+              fan={preset.fan}
+              level={preset.level}
+            />
+          )}
           {screen === 'face'    && <WatchFaceScreen {...preset} onNavigate={goTo} />}
+          {screen === 'apps'    && (
+            <AppGridScreen
+              onOpenVista={() => transitionTo('onboarding', 'right')}
+            />
+          )}
           {screen === 'mode'    && (
             <ModeScreen
               onBack={() => transitionTo('face', 'left')}
@@ -234,7 +301,7 @@ export default function App() {
           </View>
         </>
       )}
-      {screen !== 'onboarding' && (
+      {screen !== 'onboarding' && screen !== 'apps' && screen !== 'clock' && (
         <View style={styles.controlsSlot}>
           <View style={styles.navRow}>
             {NAV_ITEMS.map((item) => {
@@ -258,6 +325,12 @@ export default function App() {
             })}
           </View>
         </View>
+      )}
+      {screen === 'clock' && (
+        <Text style={styles.controlsLabel}>Saat Yüzü · Aşağı kaydır → Apps</Text>
+      )}
+      {screen === 'apps' && (
+        <Text style={styles.controlsLabel}>Uygulama Grid · VISTA logosuna bas</Text>
       )}
       {screen === 'onboarding' && (
         <Text style={styles.hint}>Onboarding adımlarını tamamla → Ana saat ekranına geç</Text>
